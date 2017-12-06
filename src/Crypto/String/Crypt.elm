@@ -34,7 +34,7 @@ module Crypto.String.Crypt
 -}
 
 import Array exposing (Array)
-import Crypto.String.BlockAes as BlockAes
+import Crypto.String.BlockAes as Aes
 import Crypto.String.Chaining as Chaining
 import Crypto.String.Types
     exposing
@@ -49,7 +49,7 @@ import Crypto.String.Types
 
 {-| TODO
 -}
-processKey : KeyExpander k -> String -> Array Int
+processKey : KeyExpander key -> String -> Array Int
 processKey expander string =
     Array.empty
 
@@ -58,22 +58,22 @@ defaultEncoding : Encoding String
 defaultEncoding =
     { name = "dummy"
     , parameters = "nothing"
-    , encoder = \_ -> ""
-    , decoder = \_ -> []
+    , encoder = \_ -> "" --TODO
+    , decoder = \_ -> [] --TODO
     }
 
 
 {-| Default key type.
 -}
 type alias DefaultKey =
-    Key BlockAes.Key
+    Key Aes.Key
 
 
 {-| Default configuration.
 -}
-defaultConfig : Config BlockAes.Key Chaining.EcbState String
+defaultConfig : Config Aes.Key Chaining.EcbState String
 defaultConfig =
-    { encryption = BlockAes.encryption
+    { encryption = Aes.encryption
     , chaining = Chaining.ecbChaining
     , encoding = defaultEncoding
     }
@@ -97,7 +97,7 @@ expandKeyString config string =
 
 {-| Encrypt a string. Encode the output as Base64 with 80-character lines.
 -}
-encrypt : Config k state p -> Key k -> String -> String
+encrypt : Config key state params -> Key key -> String -> String
 encrypt config key string =
     --This will use the blockchain algorithm and block encoder
     string
@@ -105,7 +105,7 @@ encrypt config key string =
 
 {-| Decrypt a string created with `encrypt`.
 -}
-decrypt : Config k state p -> Key k -> String -> String
+decrypt : Config key state params -> Key key -> String -> String
 decrypt config key string =
     --This will use the blockchain algorithm and block encoder
     string

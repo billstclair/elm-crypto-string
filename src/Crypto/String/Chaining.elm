@@ -51,9 +51,10 @@ type alias EcbState =
 
 {-| Electronic Codebook state
 -}
-ecbChaining : Chaining k EcbState
+ecbChaining : Chaining key EcbState
 ecbChaining =
     { name = "ECB Chaining"
+    , initializer = \_ -> "EcbState"
     , encryptor = ecbChainer
     , decryptor = ecbChainer
     , adjoiner = identityAdjoiner
@@ -71,6 +72,6 @@ identityRemover state blocks =
     ( state, blocks )
 
 
-ecbChainer : Chainer k EcbState
+ecbChainer : Chainer key EcbState
 ecbChainer state encryptor key block =
     ( state, encryptor key block )

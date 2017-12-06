@@ -42,6 +42,7 @@ type alias Key =
 encryption : Encryption AES.Keys
 encryption =
     { name = "AES"
+    , blockSize = 16
     , keyExpander = keyExpander
     , encryptor = encrypt
     , decryptor = decrypt

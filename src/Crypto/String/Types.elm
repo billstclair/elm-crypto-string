@@ -13,8 +13,10 @@
 module Crypto.String.Types
     exposing
         ( Block
+        , BlockSize
         , Chainer
         , Chaining
+        , ChainingInitializer
         , ChainingStateAdjoiner
         , ChainingStateRemover
         , Config
@@ -33,10 +35,11 @@ module Crypto.String.Types
 
 # Types
 
-@docs KeyExpander, Key, Config, Block
+@docs KeyExpander, Key, Config, BlockSize, Block
 @docs Encryption, Encryptor, Decryptor
 @docs Encoding, Encoder, Decoder
-@docs Chaining, Chainer, ChainingStateAdjoiner, ChainingStateRemover
+@docs Chaining, ChainingInitializer, Chainer
+@docs ChainingStateAdjoiner, ChainingStateRemover
 
 -}
 
@@ -45,8 +48,8 @@ import Array exposing (Array)
 
 {-| A portable name for block encryption algorithm specific keys.
 -}
-type Key k
-    = Key k
+type Key key
+    = Key key
 
 
 {-| Describe key expansion for a particular block encryption algorithm.
@@ -56,10 +59,16 @@ type Key k
 `expander` is a function to turn an array of that size into a key.
 
 -}
-type alias KeyExpander k =
+type alias KeyExpander key =
     { keySize : Int
-    , expander : Array Int -> Result String k
+    , expander : Array Int -> Result String key
     }
+
+
+{-| An alternative name for Int to make docs clearer.
+-}
+type alias BlockSize =
+    Int
 
 
 {-| One block for a block encryption algorithm.
@@ -70,20 +79,20 @@ type alias Block =
 
 {-| An encryption function for a particular low-level block algorithm.
 -}
-type alias Encryptor k =
-    k -> Block -> Block
+type alias Encryptor key =
+    key -> Block -> Block
 
 
 {-| A decryption function for a particular low-level block algorithm.
 -}
-type alias Decryptor k =
-    k -> Block -> Block
+type alias Decryptor key =
+    key -> Block -> Block
 
 
 {-| A block chaining algorithm.
 -}
-type alias Chainer k state =
-    state -> Encryptor k -> k -> Block -> ( state, Block )
+type alias Chainer key state =
+    state -> Encryptor key -> key -> Block -> ( state, Block )
 
 
 {-| Adjoin chaining state to a list of ciphertext blocks.
@@ -98,12 +107,19 @@ type alias ChainingStateRemover state =
     List Block -> ( state, List Block )
 
 
+{-| Create an initial chaining state for encryption.
+-}
+type alias ChainingInitializer state =
+    BlockSize -> state
+
+
 {-| Package up all the information needed to do block chaining.
 -}
-type alias Chaining k state =
+type alias Chaining key state =
     { name : String
-    , encryptor : Chainer k state
-    , decryptor : Chainer k state
+    , initializer : ChainingInitializer state
+    , encryptor : Chainer key state
+    , decryptor : Chainer key state
     , adjoiner : ChainingStateAdjoiner state
     , remover : ChainingStateRemover state
     }
@@ -123,9 +139,9 @@ type alias Decoder =
 
 {-| Encoder and decoder for translating between strings and blocks.
 -}
-type alias Encoding p =
+type alias Encoding params =
     { name : String
-    , parameters : p
+    , parameters : params
     , encoder : Encoder
     , decoder : Decoder
     }
@@ -133,18 +149,19 @@ type alias Encoding p =
 
 {-| Package up information about a block encryption algorithm.
 -}
-type alias Encryption k =
+type alias Encryption key =
     { name : String
-    , keyExpander : KeyExpander k
-    , encryptor : Encryptor k
-    , decryptor : Decryptor k
+    , blockSize : BlockSize
+    , keyExpander : KeyExpander key
+    , encryptor : Encryptor key
+    , decryptor : Decryptor key
     }
 
 
 {-| Configuration for the block chaining and string encoding
 -}
-type alias Config k state p =
-    { encryption : Encryption k
-    , chaining : Chaining k state
-    , encoding : Encoding p
+type alias Config key state params =
+    { encryption : Encryption key
+    , chaining : Chaining key state
+    , encoding : Encoding params
     }
