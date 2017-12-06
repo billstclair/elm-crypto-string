@@ -1,5 +1,6 @@
 module Tests exposing (all)
 
+import Crypto.String exposing (Key, decrypt, encrypt, expandKeyString)
 import Expect exposing (Expectation)
 import Test exposing (..)
 
@@ -13,9 +14,20 @@ all : Test
 all =
     Test.concat <|
         List.concat
-            [ List.map doTest intData
-            , List.map doTest intResultData
+            [ List.map doTest <|
+                case key of
+                    Ok k ->
+                        stringData k
+
+                    Err msg ->
+                        [ ( "badkey", "The key was bad:", msg ) ]
             ]
+
+
+key : Result String Key
+key =
+    expandKeyString
+        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
 
 
 log =
@@ -75,16 +87,7 @@ doResultTest ( name, was, sb ) =
 
 {-| Tests that return integers
 -}
-intData : List ( String, Int, Int )
-intData =
-    [ ( "1+1", 1 + 1, 2 )
-    ]
-
-
-{-| Tests that return Results with integers.
--}
-intResultData : List ( String, Result String Int, Result String Int )
-intResultData =
-    [ ( "Error foo", Err "foo", Err "foo" )
-    , ( "Ok 1+1", Ok (1 + 1), Ok 2 )
+stringData : Key -> List ( String, String, String )
+stringData key =
+    [ ( "encrypt", encrypt key "foo", "foo" )
     ]
