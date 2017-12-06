@@ -26,6 +26,7 @@ module Crypto.String exposing (Key, decrypt, encrypt, expandKeyString)
 
 -}
 
+import Array
 import Crypto.String.BlockAes as Aes
 import Crypto.String.Crypt as Crypt
 import Crypto.String.Types as Types
@@ -48,14 +49,21 @@ expandKeyString string =
     Crypt.expandKeyString config string
 
 
+{-| A dummy random generator that isn't random
+-}
+dummyGenerator : Types.RandomGenerator ()
+dummyGenerator blockSize =
+    ( (), Array.initialize blockSize identity )
+
+
 {-| Encrypt a string. Encode the output as Base64 with 80-character lines.
 
 Use `Crypto.String.Crypt` for more options.
 
 -}
-encrypt : Key -> String -> String
-encrypt key =
-    Crypt.encrypt config key
+encrypt : Types.RandomGenerator randomState -> Key -> String -> ( randomState, String )
+encrypt generator key =
+    Crypt.encrypt config generator key
 
 
 {-| Decrypt a string created with `encrypt`.

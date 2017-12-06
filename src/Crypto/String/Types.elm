@@ -28,6 +28,7 @@ module Crypto.String.Types
         , Encryptor
         , Key(..)
         , KeyExpander
+        , RandomGenerator
         )
 
 {-| Shared types used by all the Crypto.String modules.
@@ -38,7 +39,7 @@ module Crypto.String.Types
 @docs KeyExpander, Key, Config, BlockSize, Block
 @docs Encryption, Encryptor, Decryptor
 @docs Encoding, Encoder, Decoder
-@docs Chaining, ChainingInitializer, Chainer
+@docs Chaining, RandomGenerator, ChainingInitializer, Chainer
 @docs ChainingStateAdjoiner, ChainingStateRemover
 
 -}
@@ -104,20 +105,26 @@ type alias ChainingStateAdjoiner state =
 {-| Remove the adjoined state from a list of cipher blocks and turn it into a state.
 -}
 type alias ChainingStateRemover state =
-    List Block -> ( state, List Block )
+    BlockSize -> List Block -> ( state, List Block )
+
+
+{-| Create a random byte array of a given length
+-}
+type alias RandomGenerator randomState =
+    BlockSize -> ( randomState, Block )
 
 
 {-| Create an initial chaining state for encryption.
 -}
-type alias ChainingInitializer state =
-    BlockSize -> state
+type alias ChainingInitializer randomState state =
+    RandomGenerator randomState -> BlockSize -> ( randomState, state )
 
 
 {-| Package up all the information needed to do block chaining.
 -}
-type alias Chaining key state =
+type alias Chaining key randomState state =
     { name : String
-    , initializer : ChainingInitializer state
+    , initializer : ChainingInitializer randomState state
     , encryptor : Chainer key state
     , decryptor : Chainer key state
     , adjoiner : ChainingStateAdjoiner state
@@ -134,14 +141,13 @@ type alias Encoder =
 {-| A string decoding algorithm
 -}
 type alias Decoder =
-    String -> List Block
+    String -> Result String (List Block)
 
 
 {-| Encoder and decoder for translating between strings and blocks.
 -}
-type alias Encoding params =
+type alias Encoding =
     { name : String
-    , parameters : params
     , encoder : Encoder
     , decoder : Decoder
     }
@@ -160,8 +166,8 @@ type alias Encryption key =
 
 {-| Configuration for the block chaining and string encoding
 -}
-type alias Config key state params =
+type alias Config key randomState state =
     { encryption : Encryption key
-    , chaining : Chaining key state
-    , encoding : Encoding params
+    , chaining : Chaining key randomState state
+    , encoding : Encoding
     }

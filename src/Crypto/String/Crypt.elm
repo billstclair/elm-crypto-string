@@ -36,31 +36,31 @@ module Crypto.String.Crypt
 import Array exposing (Array)
 import Crypto.String.BlockAes as Aes
 import Crypto.String.Chaining as Chaining
+import Crypto.String.Encoding as Encoding
 import Crypto.String.Types
     exposing
-        ( Config
+        ( Block
+        , BlockSize
+        , Config
         , Decryptor
         , Encoding
         , Encryptor
         , Key(..)
         , KeyExpander
+        , RandomGenerator
         )
 
 
 {-| TODO
 -}
-processKey : KeyExpander key -> String -> Array Int
+processKey : KeyExpander key -> String -> Result String key
 processKey expander string =
-    Array.empty
+    Encoding.keyEncoder expander.keySize string
+        |> expander.expander
 
 
-defaultEncoding : Encoding String
 defaultEncoding =
-    { name = "dummy"
-    , parameters = "nothing"
-    , encoder = \_ -> "" --TODO
-    , decoder = \_ -> [] --TODO
-    }
+    Encoding.base64Encoding 60
 
 
 {-| Default key type.
@@ -71,7 +71,7 @@ type alias DefaultKey =
 
 {-| Default configuration.
 -}
-defaultConfig : Config Aes.Key Chaining.EcbState String
+defaultConfig : Config Aes.Key randomState Chaining.EcbState
 defaultConfig =
     { encryption = Aes.encryption
     , chaining = Chaining.ecbChaining
@@ -81,13 +81,13 @@ defaultConfig =
 
 {-| Expand a key preparing it for use with `encrypt` or `decrypt`.
 -}
-expandKeyString : Config k state p -> String -> Result String (Key k)
+expandKeyString : Config key randomState state -> String -> Result String (Key key)
 expandKeyString config string =
     let
         expander =
             config.encryption.keyExpander
     in
-    case expander.expander (processKey expander string) of
+    case processKey expander string of
         Err msg ->
             Err msg
 
@@ -95,17 +95,55 @@ expandKeyString config string =
             Ok <| Key key
 
 
+{-| Encrypt a list of blocks.
+-}
+encryptBlocks : Config key randomState state -> RandomGenerator randomState -> Key key -> List Block -> ( randomState, List Block )
+encryptBlocks config generator (Key key) blocks =
+    let
+        chaining =
+            config.chaining
+
+        encryption =
+            config.encryption
+
+        chainer =
+            chaining.encryptor
+
+        encryptor =
+            encryption.encryptor
+
+        ( randomState, state ) =
+            chaining.initializer generator encryption.blockSize
+
+        step : Block -> ( state, List Block ) -> ( state, List Block )
+        step =
+            \block ( state, blocks ) ->
+                let
+                    ( state2, outBlock ) =
+                        chainer state encryptor key block
+                in
+                ( state2, outBlock :: blocks )
+
+        ( finalState, cipherBlocks ) =
+            List.foldl step ( state, [] ) blocks
+    in
+    ( randomState, chaining.adjoiner finalState cipherBlocks )
+
+
 {-| Encrypt a string. Encode the output as Base64 with 80-character lines.
 -}
-encrypt : Config key state params -> Key key -> String -> String
-encrypt config key string =
-    --This will use the blockchain algorithm and block encoder
-    string
+encrypt : Config key randomState state -> RandomGenerator randomState -> Key key -> String -> ( randomState, String )
+encrypt config generator key plaintext =
+    Encoding.plainTextEncoder plaintext
+        |> encryptBlocks config generator key
+        |> (\( randomState, cipherBlocks ) ->
+                ( randomState, config.encoding.encoder cipherBlocks )
+           )
 
 
 {-| Decrypt a string created with `encrypt`.
 -}
-decrypt : Config key state params -> Key key -> String -> String
+decrypt : Config key randomState state -> Key key -> String -> String
 decrypt config key string =
     --This will use the blockchain algorithm and block encoder
     string

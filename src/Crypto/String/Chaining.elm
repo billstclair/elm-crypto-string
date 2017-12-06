@@ -36,8 +36,10 @@ import Array exposing (Array)
 import Crypto.String.Types
     exposing
         ( Block
+        , BlockSize
         , Chainer
         , Chaining
+        , ChainingInitializer
         , ChainingStateAdjoiner
         , ChainingStateRemover
         )
@@ -46,19 +48,28 @@ import Crypto.String.Types
 {-| The state for ECB chaining
 -}
 type alias EcbState =
-    String
+    ()
 
 
-{-| Electronic Codebook state
+emptyStateInitializer : ChainingInitializer randomState ()
+emptyStateInitializer generator _ =
+    let
+        ( state, _ ) =
+            generator 0
+    in
+    ( state, () )
+
+
+{-| Electronic Codebook chaining
 -}
-ecbChaining : Chaining key EcbState
+ecbChaining : Chaining key randomState EcbState
 ecbChaining =
     { name = "ECB Chaining"
-    , initializer = \_ -> "EcbState"
+    , initializer = emptyStateInitializer
     , encryptor = ecbChainer
     , decryptor = ecbChainer
     , adjoiner = identityAdjoiner
-    , remover = identityRemover "EcbState"
+    , remover = identityRemover ()
     }
 
 
@@ -67,8 +78,8 @@ identityAdjoiner _ blocks =
     blocks
 
 
-identityRemover : state -> List Block -> ( state, List Block )
-identityRemover state blocks =
+identityRemover : state -> BlockSize -> List Block -> ( state, List Block )
+identityRemover state _ blocks =
     ( state, blocks )
 
 
