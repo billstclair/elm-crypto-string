@@ -12,13 +12,19 @@
 
 module Crypto.String.Crypt
     exposing
-        ( decrypt
+        ( DefaultKey
+        , decrypt
         , defaultConfig
         , encrypt
         , expandKeyString
         )
 
 {-| Block chaining and string encryption for use with any block cipher.
+
+
+# Types
+
+@docs DefaultKey
 
 
 # Functions
@@ -34,6 +40,7 @@ import Crypto.String.Types
     exposing
         ( Config
         , Decryptor
+        , Encoding
         , Encryptor
         , Key(..)
         , KeyExpander
@@ -47,24 +54,40 @@ processKey expander string =
     Array.empty
 
 
-{-| Default configuration.
--}
-defaultConfig : Config BlockAes.Key Chaining.EcbState
-defaultConfig =
-    { keyExpander = BlockAes.keyExpander
-    , encryptor = BlockAes.encrypt
-    , decryptor = BlockAes.decrypt
-    , chainer = Chaining.ecbChainer
+defaultEncoding : Encoding String
+defaultEncoding =
+    { name = "dummy"
+    , parameters = "nothing"
     , encoder = \_ -> ""
     , decoder = \_ -> []
     }
 
 
+{-| Default key type.
+-}
+type alias DefaultKey =
+    Key BlockAes.Key
+
+
+{-| Default configuration.
+-}
+defaultConfig : Config BlockAes.Key Chaining.EcbState String
+defaultConfig =
+    { encryption = BlockAes.encryption
+    , chaining = Chaining.ecbChaining
+    , encoding = defaultEncoding
+    }
+
+
 {-| Expand a key preparing it for use with `encrypt` or `decrypt`.
 -}
-expandKeyString : Config k state -> String -> Result String (Key k)
+expandKeyString : Config k state p -> String -> Result String (Key k)
 expandKeyString config string =
-    case config.keyExpander.expander (processKey config.keyExpander string) of
+    let
+        expander =
+            config.encryption.keyExpander
+    in
+    case expander.expander (processKey expander string) of
         Err msg ->
             Err msg
 
@@ -74,7 +97,7 @@ expandKeyString config string =
 
 {-| Encrypt a string. Encode the output as Base64 with 80-character lines.
 -}
-encrypt : Config k state -> Key k -> String -> String
+encrypt : Config k state p -> Key k -> String -> String
 encrypt config key string =
     --This will use the blockchain algorithm and block encoder
     string
@@ -82,7 +105,7 @@ encrypt config key string =
 
 {-| Decrypt a string created with `encrypt`.
 -}
-decrypt : Config k state -> Key k -> String -> String
+decrypt : Config k state p -> Key k -> String -> String
 decrypt config key string =
     --This will use the blockchain algorithm and block encoder
     string

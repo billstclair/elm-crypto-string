@@ -10,7 +10,7 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.String.BlockAes exposing (Key, decrypt, encrypt, keyExpander)
+module Crypto.String.BlockAes exposing (Key, encryption)
 
 {-| Connect Crypto.AES to Crypto.String.Crypt
 
@@ -22,13 +22,13 @@ module Crypto.String.BlockAes exposing (Key, decrypt, encrypt, keyExpander)
 
 # Functions
 
-@docs keyExpander, encrypt, decrypt
+@docs encryption
 
 -}
 
 import Array exposing (Array)
 import Crypto.AES as AES
-import Crypto.String.Types exposing (Block, KeyExpander)
+import Crypto.String.Types exposing (Block, Encryption, KeyExpander)
 
 
 {-| AES key type
@@ -37,8 +37,17 @@ type alias Key =
     AES.Keys
 
 
-{-| AES key expansion.
+{-| AES encryption.
 -}
+encryption : Encryption AES.Keys
+encryption =
+    { name = "AES"
+    , keyExpander = keyExpander
+    , encryptor = encrypt
+    , decryptor = decrypt
+    }
+
+
 keyExpander : KeyExpander AES.Keys
 keyExpander =
     { keySize = 32
@@ -50,15 +59,11 @@ keyExpander =
 -- TODO: setKeySize : Int -> KeyExpander AES.Keys -> KeyExpander AES.Keys
 
 
-{-| AES encryptor.
--}
 encrypt : AES.Keys -> Block -> Block
 encrypt keys block =
     AES.encrypt keys block
 
 
-{-| AES decryptor.
--}
 decrypt : AES.Keys -> Block -> Block
 decrypt keys block =
     AES.decrypt keys block

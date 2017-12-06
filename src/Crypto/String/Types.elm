@@ -14,10 +14,15 @@ module Crypto.String.Types
     exposing
         ( Block
         , Chainer
+        , Chaining
+        , ChainingStateAdjoiner
+        , ChainingStateRemover
         , Config
         , Decoder
         , Decryptor
         , Encoder
+        , Encoding
+        , Encryption
         , Encryptor
         , Key(..)
         , KeyExpander
@@ -29,7 +34,9 @@ module Crypto.String.Types
 # Types
 
 @docs KeyExpander, Key, Config, Block
-@docs Encryptor, Decryptor, Chainer, Encoder, Decoder
+@docs Encryption, Encryptor, Decryptor
+@docs Encoding, Encoder, Decoder
+@docs Chaining, Chainer, ChainingStateAdjoiner, ChainingStateRemover
 
 -}
 
@@ -79,6 +86,29 @@ type alias Chainer k state =
     state -> Encryptor k -> k -> Block -> ( state, Block )
 
 
+{-| Adjoin chaining state to a list of ciphertext blocks.
+-}
+type alias ChainingStateAdjoiner state =
+    state -> List Block -> List Block
+
+
+{-| Remove the adjoined state from a list of cipher blocks and turn it into a state.
+-}
+type alias ChainingStateRemover state =
+    List Block -> ( state, List Block )
+
+
+{-| Package up all the information needed to do block chaining.
+-}
+type alias Chaining k state =
+    { name : String
+    , encryptor : Chainer k state
+    , decryptor : Chainer k state
+    , adjoiner : ChainingStateAdjoiner state
+    , remover : ChainingStateRemover state
+    }
+
+
 {-| A string encoding algorithm
 -}
 type alias Encoder =
@@ -91,13 +121,30 @@ type alias Decoder =
     String -> List Block
 
 
-{-| Configuration for the block chaining and string encoding
+{-| Encoder and decoder for translating between strings and blocks.
 -}
-type alias Config k state =
-    { keyExpander : KeyExpander k
-    , encryptor : Encryptor k
-    , decryptor : Encryptor k
-    , chainer : Chainer k state
+type alias Encoding p =
+    { name : String
+    , parameters : p
     , encoder : Encoder
     , decoder : Decoder
+    }
+
+
+{-| Package up information about a block encryption algorithm.
+-}
+type alias Encryption k =
+    { name : String
+    , keyExpander : KeyExpander k
+    , encryptor : Encryptor k
+    , decryptor : Decryptor k
+    }
+
+
+{-| Configuration for the block chaining and string encoding
+-}
+type alias Config k state p =
+    { encryption : Encryption k
+    , chaining : Chaining k state
+    , encoding : Encoding p
     }
