@@ -1,6 +1,12 @@
 module Tests exposing (all)
 
-import Crypto.String exposing (Key, decrypt, encrypt, expandKeyString)
+import Crypto.String
+    exposing
+        ( Key
+        , decrypt
+        , dummyGenerator
+        , expandKeyString
+        )
 import Expect exposing (Expectation)
 import Test exposing (..)
 
@@ -83,6 +89,12 @@ doResultTest ( name, was, sb ) =
         (\_ ->
             expectResult sb was
         )
+
+
+encrypt : Key -> String -> String
+encrypt key string =
+    Crypto.String.encrypt dummyGenerator key string
+        |> Tuple.second
 
 
 {-| Tests that return integers

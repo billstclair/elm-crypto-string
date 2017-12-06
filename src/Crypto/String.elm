@@ -10,7 +10,14 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.String exposing (Key, decrypt, encrypt, expandKeyString)
+module Crypto.String
+    exposing
+        ( Key
+        , decrypt
+        , dummyGenerator
+        , encrypt
+        , expandKeyString
+        )
 
 {-| Block chaining and string encryption for use with any block cipher.
 
@@ -22,7 +29,7 @@ module Crypto.String exposing (Key, decrypt, encrypt, expandKeyString)
 
 # Functions
 
-@docs expandKeyString, encrypt, decrypt
+@docs expandKeyString, dummyGenerator, encrypt, decrypt
 
 -}
 

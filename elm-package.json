@@ -11,7 +11,7 @@
       "Crypto.String.Types",
       "Crypto.String.Crypt",
       "Crypto.String.BlockAes",
-      "Crypto.String.Chainging",
+      "Crypto.String.Chaining",
       "Crypto.String.Encoding"
       
     ],

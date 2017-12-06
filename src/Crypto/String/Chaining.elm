@@ -23,7 +23,7 @@ Algorithm descriptions: <https://en.wikipedia.org/wiki/Block_cipher_mode_of_oper
 
 # Classes
 
-#docs EcbState
+@docs EcbState
 
 
 # Functions
