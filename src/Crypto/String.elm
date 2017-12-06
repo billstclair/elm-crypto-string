@@ -17,12 +17,12 @@ module Crypto.String exposing (Key, decrypt, encrypt, expandKeyString)
 
 # Types
 
-@doc Key
+@docs Key
 
 
 # Functions
 
-@doc expandKeyString, encrypt, decrypt
+@docs expandKeyString, encrypt, decrypt
 
 -}
 
@@ -37,11 +37,15 @@ type alias Key =
     Types.Key Aes.Key
 
 
+config =
+    Crypt.defaultConfig
+
+
 {-| Expand a key preparing it for use with `encrypt` or `decrypt`.
 -}
 expandKeyString : String -> Result String Key
 expandKeyString string =
-    Crypt.expandKeyString Aes.keyExpander string
+    Crypt.expandKeyString config string
 
 
 {-| Encrypt a string. Encode the output as Base64 with 80-character lines.
@@ -51,7 +55,7 @@ Use `Crypto.String.Crypt` for more options.
 -}
 encrypt : Key -> String -> String
 encrypt key =
-    Crypt.encrypt Crypt.defaultConfig Aes.encryptor key
+    Crypt.encrypt config key
 
 
 {-| Decrypt a string created with `encrypt`.
@@ -61,4 +65,4 @@ Use `Crypto.String.Crypt` for more options.
 -}
 decrypt : Key -> String -> String
 decrypt key =
-    Crypt.decrypt Crypt.defaultConfig Aes.decryptor key
+    Crypt.decrypt config key

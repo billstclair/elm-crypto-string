@@ -21,13 +21,15 @@ module Crypto.String.Crypt
 {-| Block chaining and string encryption for use with any block cipher.
 
 
-# High-level functions
+# Functions
 
-@doc expandKeyString, defaultConfig, encrypt, decrypt
+@docs expandKeyString, defaultConfig, encrypt, decrypt
 
 -}
 
 import Array exposing (Array)
+import Crypto.String.BlockAes as BlockAes
+import Crypto.String.Chaining as Chaining
 import Crypto.String.Types
     exposing
         ( Config
@@ -45,11 +47,24 @@ processKey expander string =
     Array.empty
 
 
+{-| Default configuration.
+-}
+defaultConfig : Config BlockAes.Key Chaining.EcbState
+defaultConfig =
+    { keyExpander = BlockAes.keyExpander
+    , encryptor = BlockAes.encrypt
+    , decryptor = BlockAes.decrypt
+    , chainer = Chaining.ecbChainer
+    , encoder = \_ -> ""
+    , decoder = \_ -> []
+    }
+
+
 {-| Expand a key preparing it for use with `encrypt` or `decrypt`.
 -}
-expandKeyString : KeyExpander k -> String -> Result String (Key k)
-expandKeyString expander string =
-    case expander.expander (processKey expander string) of
+expandKeyString : Config k state -> String -> Result String (Key k)
+expandKeyString config string =
+    case config.keyExpander.expander (processKey config.keyExpander string) of
         Err msg ->
             Err msg
 
@@ -57,24 +72,17 @@ expandKeyString expander string =
             Ok <| Key key
 
 
-{-| Default configuration.
--}
-defaultConfig : Config
-defaultConfig =
-    "Default"
-
-
 {-| Encrypt a string. Encode the output as Base64 with 80-character lines.
 -}
-encrypt : Config -> Encryptor k -> Key k -> String -> String
-encrypt config encryptor key string =
+encrypt : Config k state -> Key k -> String -> String
+encrypt config key string =
     --This will use the blockchain algorithm and block encoder
     string
 
 
 {-| Decrypt a string created with `encrypt`.
 -}
-decrypt : Config -> Decryptor k -> Key k -> String -> String
-decrypt config decryptor key string =
+decrypt : Config k state -> Key k -> String -> String
+decrypt config key string =
     --This will use the blockchain algorithm and block encoder
     string

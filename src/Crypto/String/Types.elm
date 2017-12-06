@@ -13,8 +13,11 @@
 module Crypto.String.Types
     exposing
         ( Block
+        , Chainer
         , Config
+        , Decoder
         , Decryptor
+        , Encoder
         , Encryptor
         , Key(..)
         , KeyExpander
@@ -25,7 +28,8 @@ module Crypto.String.Types
 
 # Types
 
-@doc KeyExpander, Key, Config, Block, Encryptor, Decryptor
+@docs KeyExpander, Key, Config, Block
+@docs Encryptor, Decryptor, Chainer, Encoder, Decoder
 
 -}
 
@@ -69,10 +73,31 @@ type alias Decryptor k =
     k -> Block -> Block
 
 
-{-| Configuration for the block chaining and string encoding
-
-Not yet fleshed out.
-
+{-| A block chaining algorithm.
 -}
-type alias Config =
-    String
+type alias Chainer k state =
+    state -> Encryptor k -> k -> Block -> ( state, Block )
+
+
+{-| A string encoding algorithm
+-}
+type alias Encoder =
+    List Block -> String
+
+
+{-| A string decoding algorithm
+-}
+type alias Decoder =
+    String -> List Block
+
+
+{-| Configuration for the block chaining and string encoding
+-}
+type alias Config k state =
+    { keyExpander : KeyExpander k
+    , encryptor : Encryptor k
+    , decryptor : Encryptor k
+    , chainer : Chainer k state
+    , encoder : Encoder
+    , decoder : Decoder
+    }

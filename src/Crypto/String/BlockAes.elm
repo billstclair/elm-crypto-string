@@ -10,7 +10,7 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.String.BlockAes exposing (Key, decryptor, encryptor, keyExpander)
+module Crypto.String.BlockAes exposing (Key, decrypt, encrypt, keyExpander)
 
 {-| Connect Crypto.AES to Crypto.String.Crypt
 
@@ -22,7 +22,7 @@ module Crypto.String.BlockAes exposing (Key, decryptor, encryptor, keyExpander)
 
 # Functions
 
-@docs keyExpander, encryptor, decryptor
+@docs keyExpander, encrypt, decrypt
 
 -}
 
@@ -52,13 +52,13 @@ keyExpander =
 
 {-| AES encryptor.
 -}
-encryptor : AES.Keys -> Block -> Block
-encryptor keys block =
+encrypt : AES.Keys -> Block -> Block
+encrypt keys block =
     AES.encrypt keys block
 
 
 {-| AES decryptor.
 -}
-decryptor : AES.Keys -> Block -> Block
-decryptor keys block =
+decrypt : AES.Keys -> Block -> Block
+decrypt keys block =
     AES.decrypt keys block
