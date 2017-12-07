@@ -49,14 +49,14 @@ keyEncoder blockSize string =
 
 {-| Encode a string as UTF-8 bytes
 -}
-plainTextEncoder : String -> List Block
+plainTextEncoder : String -> List Int
 plainTextEncoder string =
     []
 
 
 {-| Decode UTF-8 bytes into a string. Sometimes this is not possible.
 -}
-plainTextDecoder : List Block -> Result String String
+plainTextDecoder : List Int -> Result String String
 plainTextDecoder blocks =
     Err "plainTextDecoder is not yet implemented."
 
@@ -73,14 +73,14 @@ hexEncoding =
 
 {-| Convert bytes to hex.
 -}
-hexEncoder : List Block -> String
+hexEncoder : List Int -> String
 hexEncoder blocks =
     ""
 
 
 {-| Convert a hex string to bytes. Sometimes the string is malformed.
 -}
-hexDecoder : String -> Result String (List Block)
+hexDecoder : String -> Result String (List Int)
 hexDecoder string =
     Err "hexDecoder is not yet implemented."
 
@@ -104,6 +104,7 @@ splitLines lineLength string =
         string
     else
         let
+            loop : String -> List String -> String
             loop =
                 \tail res ->
                     if String.length tail <= lineLength then
@@ -120,11 +121,9 @@ splitLines lineLength string =
 
 {-| Convert bytes to Base64.
 -}
-base64Encoder : Int -> List Block -> String
-base64Encoder lineLength blocks =
-    List.map Array.toList blocks
-        |> List.concat
-        |> Base64.encode
+base64Encoder : Int -> List Int -> String
+base64Encoder lineLength list =
+    Base64.encode list
         |> splitLines lineLength
 
 
@@ -134,10 +133,8 @@ TODO: This should return a Block, and the Chaining.remover should
 convert it into a list of Blocks.
 
 -}
-base64Decoder : String -> Result String (List Block)
+base64Decoder : String -> Result String (List Int)
 base64Decoder string =
     String.words string
         |> String.concat
         |> Base64.decode
-        --temporary, for testing
-        |> Result.map (List.singleton << Array.fromList)

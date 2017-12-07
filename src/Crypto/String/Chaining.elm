@@ -73,12 +73,12 @@ ecbChaining =
     }
 
 
-identityAdjoiner : state -> List Block -> List Block
-identityAdjoiner _ blocks =
-    blocks
+identityAdjoiner : state -> List Int -> List Int
+identityAdjoiner _ list =
+    list
 
 
-identityRemover : state -> BlockSize -> List Block -> ( state, List Block )
+identityRemover : state -> BlockSize -> List Int -> ( state, List Int )
 identityRemover state _ blocks =
     ( state, blocks )
 

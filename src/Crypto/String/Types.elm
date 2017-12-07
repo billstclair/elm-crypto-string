@@ -99,13 +99,13 @@ type alias Chainer key state =
 {-| Adjoin chaining state to a list of ciphertext blocks.
 -}
 type alias ChainingStateAdjoiner state =
-    state -> List Block -> List Block
+    state -> List Int -> List Int
 
 
 {-| Remove the adjoined state from a list of cipher blocks and turn it into a state.
 -}
 type alias ChainingStateRemover state =
-    BlockSize -> List Block -> ( state, List Block )
+    BlockSize -> List Int -> ( state, List Int )
 
 
 {-| Create a random byte array of a given length
@@ -132,16 +132,16 @@ type alias Chaining key randomState state =
     }
 
 
-{-| A string encoding algorithm
+{-| A string encoding algorithm.
 -}
 type alias Encoder =
-    List Block -> String
+    List Int -> String
 
 
-{-| A string decoding algorithm
+{-| A string decoding algorithm.
 -}
 type alias Decoder =
-    String -> Result String (List Block)
+    String -> Result String (List Int)
 
 
 {-| Encoder and decoder for translating between strings and blocks.

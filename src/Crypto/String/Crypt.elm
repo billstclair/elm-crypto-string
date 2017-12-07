@@ -49,6 +49,7 @@ import Crypto.String.Types
         , KeyExpander
         , RandomGenerator
         )
+import List.Extra as LE
 
 
 {-| TODO
@@ -97,8 +98,8 @@ expandKeyString config string =
 
 {-| Encrypt a list of blocks.
 -}
-encryptBlocks : Config key randomState state -> RandomGenerator randomState -> Key key -> List Block -> ( randomState, List Block )
-encryptBlocks config generator (Key key) blocks =
+encryptList : Config key randomState state -> RandomGenerator randomState -> Key key -> List Int -> ( randomState, List Int )
+encryptList config generator (Key key) list =
     let
         chaining =
             config.chaining
@@ -125,11 +126,13 @@ encryptBlocks config generator (Key key) blocks =
                 ( outState, outBlock :: blocks )
 
         ( finalState, cipherBlocks ) =
-            List.foldl step ( state, [] ) blocks
+            listToBlocks encryption.blockSize list
+                |> List.foldl step ( state, [] )
     in
     ( randomState
-    , chaining.adjoiner finalState <|
-        List.reverse cipherBlocks
+    , List.reverse cipherBlocks
+        |> blocksToList
+        |> chaining.adjoiner finalState
     )
 
 
@@ -138,18 +141,49 @@ encryptBlocks config generator (Key key) blocks =
 encrypt : Config key randomState state -> RandomGenerator randomState -> Key key -> String -> ( randomState, String )
 encrypt config generator key plaintext =
     Encoding.plainTextEncoder plaintext
-        |> encryptBlocks config generator key
-        |> (\( randomState, cipherBlocks ) ->
+        |> encryptList config generator key
+        |> (\( randomState, cipherList ) ->
                 ( randomState
-                , config.encoding.encoder cipherBlocks
+                , config.encoding.encoder cipherList
                 )
            )
 
 
-{-| Decrypt a list of blocks.
+extendArray : Int -> a -> Array a -> Array a
+extendArray size fill array =
+    let
+        count =
+            size - Array.length array
+    in
+    if count <= 0 then
+        array
+    else
+        Array.append array <| Array.repeat count fill
+
+
+{-| Convert a list of integers into a list of blocks.
+
+Fill the last one with zeroes, if necessary.
+
 -}
-decryptBlocks : Config key randomState state -> Key key -> List Block -> List Block
-decryptBlocks config (Key key) rawBlocks =
+listToBlocks : Int -> List Int -> List Block
+listToBlocks blockSize list =
+    LE.greedyGroupsOf blockSize list
+        |> List.map (extendArray blockSize 0 << Array.fromList)
+
+
+{-| Convert a list of blocks into a list of integers.
+-}
+blocksToList : List Block -> List Int
+blocksToList blocks =
+    List.map Array.toList blocks
+        |> List.concat
+
+
+{-| Decrypt a list of integers.
+-}
+decryptList : Config key randomState state -> Key key -> List Int -> List Int
+decryptList config (Key key) list =
     let
         chaining =
             config.chaining
@@ -163,8 +197,11 @@ decryptBlocks config (Key key) rawBlocks =
         decryptor =
             encryption.decryptor
 
-        ( state, cipherBlocks ) =
-            chaining.remover encryption.blockSize rawBlocks
+        ( state, cipherList ) =
+            chaining.remover encryption.blockSize list
+
+        cipherBlocks =
+            listToBlocks encryption.blockSize cipherList
 
         step : Block -> ( state, List Block ) -> ( state, List Block )
         step =
@@ -179,6 +216,7 @@ decryptBlocks config (Key key) rawBlocks =
             List.foldl step ( state, [] ) cipherBlocks
     in
     List.reverse plainBlocks
+        |> blocksToList
 
 
 {-| Decrypt a string created with `encrypt`.
@@ -190,6 +228,6 @@ decrypt config key string =
         Err msg ->
             Err msg
 
-        Ok cipherBlocks ->
-            decryptBlocks config key cipherBlocks
+        Ok list ->
+            decryptList config key list
                 |> Encoding.plainTextDecoder
