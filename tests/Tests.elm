@@ -2,10 +2,8 @@ module Tests exposing (all)
 
 import Crypto.String
     exposing
-        ( Key
-        , decrypt
+        ( decrypt
         , dummyGenerator
-        , expandKeyString
         )
 import Expect exposing (Expectation)
 import Test exposing (..)
@@ -20,20 +18,13 @@ all : Test
 all =
     Test.concat <|
         List.concat
-            [ List.map doTest <|
-                case key of
-                    Ok k ->
-                        stringData k
-
-                    Err msg ->
-                        [ ( "badkey", "The key was bad:", msg ) ]
+            [ List.map doTest stringData
             ]
 
 
-key : Result String Key
-key =
-    expandKeyString
-        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+passphrase : String
+passphrase =
+    "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
 
 
 log =
@@ -91,15 +82,19 @@ doResultTest ( name, was, sb ) =
         )
 
 
-encrypt : Key -> String -> String
-encrypt key string =
-    Crypto.String.encrypt dummyGenerator key string
-        |> Tuple.second
+encrypt : String -> String -> Result String String
+encrypt passphrase plaintext =
+    case Crypto.String.encrypt dummyGenerator passphrase plaintext of
+        Err msg ->
+            Err msg
+
+        Ok ( _, res ) ->
+            Ok res
 
 
 {-| Tests that return integers
 -}
-stringData : Key -> List ( String, String, String )
-stringData key =
-    [ ( "encrypt", encrypt key "foo", "foo" )
+stringData : List ( String, Result String String, Result String String )
+stringData =
+    [ ( "encrypt", encrypt passphrase "foo", Ok "foo" )
     ]

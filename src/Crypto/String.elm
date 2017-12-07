@@ -47,7 +47,7 @@ type alias RandomGenerator randomState =
     Types.RandomGenerator randomState
 
 
-{-| A dummy random generator that isn't random
+{-| A dummy random generator that isn't random.
 -}
 dummyGenerator : RandomGenerator ()
 dummyGenerator blockSize =

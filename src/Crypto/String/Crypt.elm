@@ -141,9 +141,50 @@ encrypt config generator key plaintext =
            )
 
 
+{-| Decrypt a list of blocks.
+-}
+decryptBlocks : Config key randomState state -> Key key -> List Block -> List Block
+decryptBlocks config (Key key) rawBlocks =
+    let
+        chaining =
+            config.chaining
+
+        encryption =
+            config.encryption
+
+        chainer =
+            chaining.decryptor
+
+        decryptor =
+            encryption.decryptor
+
+        ( state, blocks ) =
+            chaining.remover encryption.blockSize rawBlocks
+
+        step : Block -> ( state, List Block ) -> ( state, List Block )
+        step =
+            \block ( state, blocks ) ->
+                let
+                    ( state2, outBlock ) =
+                        chainer state decryptor key block
+                in
+                ( state2, outBlock :: blocks )
+
+        ( _, plainBlocks ) =
+            List.foldl step ( state, [] ) blocks
+    in
+    plainBlocks
+
+
 {-| Decrypt a string created with `encrypt`.
 -}
 decrypt : Config key randomState state -> Key key -> String -> Result String String
 decrypt config key string =
     --This will use the blockchain algorithm and block encoder
-    Err "Not implemented"
+    case config.encoding.decoder string of
+        Err msg ->
+            Err msg
+
+        Ok cipherBlocks ->
+            decryptBlocks config key cipherBlocks
+                |> Encoding.plainTextDecoder
