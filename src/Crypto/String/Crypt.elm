@@ -231,3 +231,4 @@ decrypt config key string =
         Ok list ->
             decryptList config key list
                 |> Encoding.plainTextDecoder
+                |> Ok
