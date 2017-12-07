@@ -47,11 +47,14 @@ type alias RandomGenerator randomState =
     Types.RandomGenerator randomState
 
 
-{-| A dummy random generator that isn't random.
+{-| A dummy random generator that creates a block of zeroes.
+
+This is about as non-random as it gets.
+
 -}
 dummyGenerator : RandomGenerator ()
 dummyGenerator blockSize =
-    ( (), Array.initialize blockSize identity )
+    ( (), Array.repeat blockSize 0 )
 
 
 {-| Encrypt a string. Encode the output as Base64 with 80-character lines.
