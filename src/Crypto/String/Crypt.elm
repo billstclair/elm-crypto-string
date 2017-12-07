@@ -119,10 +119,10 @@ encryptBlocks config generator (Key key) blocks =
         step =
             \block ( state, blocks ) ->
                 let
-                    ( state2, outBlock ) =
+                    ( outState, outBlock ) =
                         chainer state encryptor key block
                 in
-                ( state2, outBlock :: blocks )
+                ( outState, outBlock :: blocks )
 
         ( finalState, cipherBlocks ) =
             List.foldl step ( state, [] ) blocks

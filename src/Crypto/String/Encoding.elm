@@ -36,6 +36,7 @@ module Crypto.String.Encoding
 -}
 
 import Array exposing (fromList)
+import Base64
 import Crypto.String.Types exposing (Block, BlockSize, Decoder, Encoder, Encoding)
 
 
@@ -97,15 +98,46 @@ base64Encoding lineLength =
     }
 
 
+splitLines : Int -> String -> String
+splitLines lineLength string =
+    if lineLength <= 0 then
+        string
+    else
+        let
+            loop =
+                \tail res ->
+                    if String.length tail <= lineLength then
+                        (tail :: res)
+                            |> List.reverse
+                            |> String.join "\n"
+                    else
+                        loop (String.dropLeft lineLength tail) <|
+                            String.left lineLength tail
+                                :: res
+        in
+        loop string []
+
+
 {-| Convert bytes to Base64.
 -}
 base64Encoder : Int -> List Block -> String
 base64Encoder lineLength blocks =
-    ""
+    List.map Array.toList blocks
+        |> List.concat
+        |> Base64.encode
+        |> splitLines lineLength
 
 
 {-| Convert a Base64 string to bytes. Sometimes the string is malformed.
+
+TODO: This should return a Block, and the Chaining.remover should
+convert it into a list of Blocks.
+
 -}
 base64Decoder : String -> Result String (List Block)
 base64Decoder string =
-    Err "base64Decider is not yet implemented."
+    String.words string
+        |> String.concat
+        |> Base64.decode
+        --temporary, for testing
+        |> Result.map (List.singleton << Array.fromList)

@@ -7,18 +7,18 @@
         "src"
     ],
     "exposed-modules": [
-      "Crypto.String",
-      "Crypto.String.Types",
-      "Crypto.String.Crypt",
-      "Crypto.String.BlockAes",
-      "Crypto.String.Chaining",
-      "Crypto.String.Encoding"
-      
+        "Crypto.String",
+        "Crypto.String.Types",
+        "Crypto.String.Crypt",
+        "Crypto.String.BlockAes",
+        "Crypto.String.Chaining",
+        "Crypto.String.Encoding"
     ],
     "dependencies": {
         "billstclair/elm-crypto-aes": "1.0.4 <= v < 2.0.0",
         "elm-lang/core": "5.1.1 <= v < 6.0.0",
-        "ktonon/elm-crypto": "1.1.1 <= v < 2.0.0"
+        "ktonon/elm-crypto": "1.1.1 <= v < 2.0.0",
+        "waratuman/elm-coder": "2.0.0 <= v < 3.0.0"
     },
     "elm-version": "0.18.0 <= v < 0.19.0"
 }
