@@ -198,7 +198,7 @@ decryptList config (Key key) list =
             encryption.decryptor
 
         ( state, cipherList ) =
-            chaining.remover encryption.blockSize list
+            chaining.separator encryption.blockSize list
 
         cipherBlocks =
             listToBlocks encryption.blockSize cipherList

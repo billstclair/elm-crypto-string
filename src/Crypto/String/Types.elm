@@ -18,7 +18,7 @@ module Crypto.String.Types
         , Chaining
         , ChainingInitializer
         , ChainingStateAdjoiner
-        , ChainingStateRemover
+        , ChainingStateSeparator
         , Config
         , Decoder
         , Decryptor
@@ -40,7 +40,7 @@ module Crypto.String.Types
 @docs Encryption, Encryptor, Decryptor
 @docs Encoding, Encoder, Decoder
 @docs Chaining, RandomGenerator, ChainingInitializer, Chainer
-@docs ChainingStateAdjoiner, ChainingStateRemover
+@docs ChainingStateAdjoiner, ChainingStateSeparator
 
 -}
 
@@ -104,7 +104,7 @@ type alias ChainingStateAdjoiner state =
 
 {-| Remove the adjoined state from a list of cipher blocks and turn it into a state.
 -}
-type alias ChainingStateRemover state =
+type alias ChainingStateSeparator state =
     BlockSize -> List Int -> ( state, List Int )
 
 
@@ -128,7 +128,7 @@ type alias Chaining key randomState state =
     , encryptor : Chainer key state
     , decryptor : Chainer key state
     , adjoiner : ChainingStateAdjoiner state
-    , remover : ChainingStateRemover state
+    , separator : ChainingStateSeparator state
     }
 
 

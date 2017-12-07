@@ -41,7 +41,7 @@ import Crypto.String.Types
         , Chaining
         , ChainingInitializer
         , ChainingStateAdjoiner
-        , ChainingStateRemover
+        , ChainingStateSeparator
         )
 
 
@@ -69,7 +69,7 @@ ecbChaining =
     , encryptor = ecbChainer
     , decryptor = ecbChainer
     , adjoiner = identityAdjoiner
-    , remover = identityRemover ()
+    , separator = identitySeparator ()
     }
 
 
@@ -78,8 +78,8 @@ identityAdjoiner _ list =
     list
 
 
-identityRemover : state -> BlockSize -> List Int -> ( state, List Int )
-identityRemover state _ blocks =
+identitySeparator : state -> BlockSize -> List Int -> ( state, List Int )
+identitySeparator state _ blocks =
     ( state, blocks )
 
 
