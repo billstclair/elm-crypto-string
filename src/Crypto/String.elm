@@ -12,11 +12,10 @@
 
 module Crypto.String
     exposing
-        ( Key
+        ( RandomGenerator
         , decrypt
         , dummyGenerator
         , encrypt
-        , expandKeyString
         )
 
 {-| Block chaining and string encryption for use with any block cipher.
@@ -24,60 +23,66 @@ module Crypto.String
 
 # Types
 
-@docs Key
+@docs RandomGenerator
 
 
 # Functions
 
-@docs expandKeyString, dummyGenerator, encrypt, decrypt
+@docs encrypt, decrypt, dummyGenerator
 
 -}
 
 import Array
-import Crypto.String.BlockAes as Aes
 import Crypto.String.Crypt as Crypt
 import Crypto.String.Types as Types
-
-
-{-| Key
--}
-type alias Key =
-    Types.Key Aes.Key
 
 
 config =
     Crypt.defaultConfig
 
 
-{-| Expand a key preparing it for use with `encrypt` or `decrypt`.
+{-| A function to generate randomState and an Array of bytes.
 -}
-expandKeyString : String -> Result String Key
-expandKeyString string =
-    Crypt.expandKeyString config string
+type alias RandomGenerator randomState =
+    Types.RandomGenerator randomState
 
 
 {-| A dummy random generator that isn't random
 -}
-dummyGenerator : Types.RandomGenerator ()
+dummyGenerator : RandomGenerator ()
 dummyGenerator blockSize =
     ( (), Array.initialize blockSize identity )
 
 
 {-| Encrypt a string. Encode the output as Base64 with 80-character lines.
 
-Use `Crypto.String.Crypt` for more options.
+See `Crypto.String.Crypt.encrypt` for more options.
+
+This shouldn't ever return an error, but since the key generation can possibly do so, it returns a Result instead of just (randomState, String).
 
 -}
-encrypt : Types.RandomGenerator randomState -> Key -> String -> ( randomState, String )
-encrypt generator key =
-    Crypt.encrypt config generator key
+encrypt : RandomGenerator randomState -> String -> String -> Result String ( randomState, String )
+encrypt generator passphrase plaintext =
+    case Crypt.expandKeyString config passphrase of
+        Err msg ->
+            Err msg
+
+        Ok key ->
+            Ok <| Crypt.encrypt config generator key plaintext
 
 
 {-| Decrypt a string created with `encrypt`.
 
-Use `Crypto.String.Crypt` for more options.
+See `Crypto.String.Crypt.decrypt` for more options.
+
+This can get errors if the ciphertext you pass in decrypts to something that isn't a UTF-8 string.
 
 -}
-decrypt : Key -> String -> String
-decrypt key =
-    Crypt.decrypt config key
+decrypt : String -> String -> Result String String
+decrypt passphrase ciphertext =
+    case Crypt.expandKeyString config passphrase of
+        Err msg ->
+            Err msg
+
+        Ok key ->
+            Crypt.decrypt config key ciphertext

@@ -143,7 +143,7 @@ encrypt config generator key plaintext =
 
 {-| Decrypt a string created with `encrypt`.
 -}
-decrypt : Config key randomState state -> Key key -> String -> String
+decrypt : Config key randomState state -> Key key -> String -> Result String String
 decrypt config key string =
     --This will use the blockchain algorithm and block encoder
-    string
+    Err "Not implemented"
