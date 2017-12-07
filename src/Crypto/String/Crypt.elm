@@ -127,17 +127,22 @@ encryptBlocks config generator (Key key) blocks =
         ( finalState, cipherBlocks ) =
             List.foldl step ( state, [] ) blocks
     in
-    ( randomState, chaining.adjoiner finalState cipherBlocks )
+    ( randomState
+    , chaining.adjoiner finalState <|
+        List.reverse cipherBlocks
+    )
 
 
-{-| Encrypt a string. Encode the output as Base64 with 80-character lines.
+{-| Encrypt a string.
 -}
 encrypt : Config key randomState state -> RandomGenerator randomState -> Key key -> String -> ( randomState, String )
 encrypt config generator key plaintext =
     Encoding.plainTextEncoder plaintext
         |> encryptBlocks config generator key
         |> (\( randomState, cipherBlocks ) ->
-                ( randomState, config.encoding.encoder cipherBlocks )
+                ( randomState
+                , config.encoding.encoder cipherBlocks
+                )
            )
 
 
@@ -158,7 +163,7 @@ decryptBlocks config (Key key) rawBlocks =
         decryptor =
             encryption.decryptor
 
-        ( state, blocks ) =
+        ( state, cipherBlocks ) =
             chaining.remover encryption.blockSize rawBlocks
 
         step : Block -> ( state, List Block ) -> ( state, List Block )
@@ -171,9 +176,9 @@ decryptBlocks config (Key key) rawBlocks =
                 ( state2, outBlock :: blocks )
 
         ( _, plainBlocks ) =
-            List.foldl step ( state, [] ) blocks
+            List.foldl step ( state, [] ) cipherBlocks
     in
-    plainBlocks
+    List.reverse plainBlocks
 
 
 {-| Decrypt a string created with `encrypt`.
