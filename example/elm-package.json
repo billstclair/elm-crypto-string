@@ -1,24 +1,20 @@
 {
-    "version": "2.0.1",
-    "summary": "elm-crypto-string does block chaining for string encryption.",
+    "version": "1.0.0",
+    "summary": "billstclair/elm-crypto-string examples",
     "repository": "https://github.com/billstclair/elm-crypto-string.git",
     "license": "MIT",
     "source-directories": [
-        "src"
+        ".",
+        "../src"
     ],
-    "exposed-modules": [
-        "Crypto.Strings",
-        "Crypto.Strings.Types",
-        "Crypto.Strings.Crypt",
-        "Crypto.Strings.BlockAes",
-        "Crypto.Strings.Chaining",
-        "Crypto.Strings.Encoding"
-    ],
+    "exposed-modules": [],
     "dependencies": {
         "billstclair/elm-crypto-aes": "1.0.4 <= v < 2.0.0",
         "elm-community/array-extra": "1.0.2 <= v < 2.0.0",
         "elm-community/list-extra": "6.1.0 <= v < 7.0.0",
         "elm-lang/core": "5.1.1 <= v < 6.0.0",
+        "elm-lang/html": "2.0.0 <= v < 3.0.0",
+        "elm-lang/http": "1.0.0 <= v < 2.0.0",
         "ktonon/elm-crypto": "1.1.1 <= v < 2.0.0",
         "rtfeldman/hex": "1.0.0 <= v < 2.0.0",
         "spisemisu/elm-utf8": "1.0.1 <= v < 2.0.0",
