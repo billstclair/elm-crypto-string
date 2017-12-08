@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------
 --
 -- BlockAes.elm
--- Connect Crypto.AES to Crypto.String.Crypt
+-- Connect Crypto.AES to Crypto.Strings.Crypt
 -- Copyright (c) 2017 Bill St. Clair <billstclair@gmail.com>
 -- Some rights reserved.
 -- Distributed under the MIT License
@@ -10,9 +10,9 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.String.BlockAes exposing (Key, encryption)
+module Crypto.Strings.BlockAes exposing (Key, encryption)
 
-{-| Connect Crypto.AES to Crypto.String.Crypt
+{-| Connect Crypto.AES to Crypto.Strings.Crypt
 
 
 # Types
@@ -28,7 +28,7 @@ module Crypto.String.BlockAes exposing (Key, encryption)
 
 import Array exposing (Array)
 import Crypto.AES as AES
-import Crypto.String.Types exposing (Block, Encryption, KeyExpander)
+import Crypto.Strings.Types exposing (Block, Encryption, KeyExpander)
 
 
 {-| AES key type

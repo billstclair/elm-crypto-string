@@ -10,7 +10,7 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.String.Encoding
+module Crypto.Strings.Encoding
     exposing
         ( base64Decoder
         , base64Encoder
@@ -41,7 +41,7 @@ import Base64
 import Bitwise
 import Char
 import Crypto.Hash exposing (sha256)
-import Crypto.String.Types exposing (Block, BlockSize, Decoder, Encoder, Encoding)
+import Crypto.Strings.Types exposing (Block, BlockSize, Decoder, Encoder, Encoding)
 import Hex
 import List.Extra as LE
 import UTF8

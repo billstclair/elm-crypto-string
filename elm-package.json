@@ -7,12 +7,12 @@
         "src"
     ],
     "exposed-modules": [
-        "Crypto.String",
-        "Crypto.String.Types",
-        "Crypto.String.Crypt",
-        "Crypto.String.BlockAes",
-        "Crypto.String.Chaining",
-        "Crypto.String.Encoding"
+        "Crypto.Strings",
+        "Crypto.Strings.Types",
+        "Crypto.Strings.Crypt",
+        "Crypto.Strings.BlockAes",
+        "Crypto.Strings.Chaining",
+        "Crypto.Strings.Encoding"
     ],
     "dependencies": {
         "billstclair/elm-crypto-aes": "1.0.4 <= v < 2.0.0",

@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------
 --
--- String.elm
+-- Strings.elm
 -- Top-level default string functions for elm-crypto-string.
 -- Copyright (c) 2017 Bill St. Clair <billstclair@gmail.com>
 -- Some rights reserved.
@@ -10,7 +10,7 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.String
+module Crypto.Strings
     exposing
         ( RandomGenerator
         , decrypt
@@ -33,8 +33,8 @@ module Crypto.String
 -}
 
 import Array
-import Crypto.String.Crypt as Crypt
-import Crypto.String.Types as Types
+import Crypto.Strings.Crypt as Crypt
+import Crypto.Strings.Types as Types
 
 
 config =
@@ -59,9 +59,9 @@ dummyGenerator blockSize =
 
 {-| Encrypt a string. Encode the output as Base64 with 80-character lines.
 
-See `Crypto.String.Crypt.encrypt` for more options.
+See `Crypto.Strings.Crypt.encrypt` for more options.
 
-This shouldn't ever return an error, but since the key generation can possibly do so, it returns a Result instead of just (randomState, String).
+This shouldn't ever return an error, but since the key generation can possibly do so, it returns a Result instead of just (randomState, Strings).
 
 -}
 encrypt : RandomGenerator randomState -> String -> String -> Result String ( randomState, String )
@@ -76,7 +76,7 @@ encrypt generator passphrase plaintext =
 
 {-| Decrypt a string created with `encrypt`.
 
-See `Crypto.String.Crypt.decrypt` for more options.
+See `Crypto.Strings.Crypt.decrypt` for more options.
 
 This can get errors if the ciphertext you pass in decrypts to something that isn't a UTF-8 string.
 

@@ -10,7 +10,7 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.String.Crypt
+module Crypto.Strings.Crypt
     exposing
         ( DefaultKey
         , decrypt
@@ -34,10 +34,10 @@ module Crypto.String.Crypt
 -}
 
 import Array exposing (Array)
-import Crypto.String.BlockAes as Aes
-import Crypto.String.Chaining as Chaining
-import Crypto.String.Encoding as Encoding
-import Crypto.String.Types
+import Crypto.Strings.BlockAes as Aes
+import Crypto.Strings.Chaining as Chaining
+import Crypto.Strings.Encoding as Encoding
+import Crypto.Strings.Types
     exposing
         ( Block
         , BlockSize

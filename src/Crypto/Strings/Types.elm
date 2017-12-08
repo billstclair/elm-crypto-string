@@ -10,7 +10,7 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.String.Types
+module Crypto.Strings.Types
     exposing
         ( Block
         , BlockSize
@@ -31,7 +31,7 @@ module Crypto.String.Types
         , RandomGenerator
         )
 
-{-| Shared types used by all the Crypto.String modules.
+{-| Shared types used by all the Crypto.Strings modules.
 
 
 # Types

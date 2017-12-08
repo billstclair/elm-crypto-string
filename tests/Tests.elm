@@ -1,6 +1,6 @@
 module Tests exposing (all)
 
-import Crypto.String
+import Crypto.Strings
     exposing
         ( decrypt
         , dummyGenerator
@@ -84,7 +84,7 @@ doResultTest ( name, was, sb ) =
 
 encrypt : String -> String -> Result String String
 encrypt passphrase plaintext =
-    case Crypto.String.encrypt dummyGenerator passphrase plaintext of
+    case Crypto.Strings.encrypt dummyGenerator passphrase plaintext of
         Err msg ->
             Err msg
 

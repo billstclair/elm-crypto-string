@@ -10,7 +10,7 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.String.Chaining
+module Crypto.Strings.Chaining
     exposing
         ( EcbState
         , ecbChaining
@@ -33,7 +33,7 @@ Algorithm descriptions: <https://en.wikipedia.org/wiki/Block_cipher_mode_of_oper
 -}
 
 import Array exposing (Array)
-import Crypto.String.Types
+import Crypto.Strings.Types
     exposing
         ( Block
         , BlockSize
