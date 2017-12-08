@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
-    "summary": "elm-crypto-strings does block chaining for string encryption.",
-    "repository": "https://github.com/billstclair/elm-crypto-strings.git",
+    "summary": "elm-crypto-string does block chaining for string encryption.",
+    "repository": "https://github.com/billstclair/elm-crypto-string.git",
     "license": "MIT",
     "source-directories": [
         "src"
