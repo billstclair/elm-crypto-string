@@ -12,51 +12,37 @@
 
 module Crypto.Strings
     exposing
-        ( RandomGenerator
-        , decrypt
+        ( decrypt
         , encrypt
         , justEncrypt
-        , seedGenerator
         )
 
 {-| Block chaining and string encryption for use with any block cipher.
 
 
-# Types
-
-@docs RandomGenerator
-
-
 # Functions
 
-@docs encrypt, justEncrypt, decrypt, seedGenerator
+@docs encrypt, justEncrypt, decrypt
 
 -}
 
 import Array
+import Crypto.Strings.BlockAes as Aes
+import Crypto.Strings.Chaining as Chaining
 import Crypto.Strings.Crypt as Crypt
+import Crypto.Strings.Encoding as Encoding
 import Crypto.Strings.Types as Types
 import Random exposing (Seed)
 
 
+{-| This matches Crypt.defaultConfig
+-}
+config : Types.Config Aes.Key Chaining.CtrState randomState
 config =
-    Crypt.defaultConfig
-
-
-{-| A function to generate randomState and an Array of bytes.
--}
-type alias RandomGenerator randomState =
-    Types.RandomGenerator randomState
-
-
-{-| A dummy random generator that creates a block of zeroes.
-
-This is about as non-random as it gets.
-
--}
-seedGenerator : Seed -> RandomGenerator Seed
-seedGenerator =
-    Crypt.seedGenerator
+    { encryption = Aes.encryption
+    , chaining = Chaining.ctrChaining
+    , encoding = Encoding.base64Encoding 60
+    }
 
 
 {-| Encrypt a string. Encode the output as Base64 with 80-character lines.
@@ -73,7 +59,7 @@ encrypt seed passphrase plaintext =
             Err msg
 
         Ok key ->
-            Ok <| Crypt.encrypt config (seedGenerator seed) key plaintext
+            Ok <| Crypt.encrypt config (Crypt.seedGenerator seed) key plaintext
 
 
 {-| Testing function. Just returns the result with no random generator update.
@@ -85,7 +71,7 @@ justEncrypt seed passphrase plaintext =
             ""
 
         Ok key ->
-            Crypt.encrypt config (seedGenerator seed) key plaintext
+            Crypt.encrypt config (Crypt.seedGenerator seed) key plaintext
                 |> Tuple.first
 
 
