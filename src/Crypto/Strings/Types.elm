@@ -93,7 +93,7 @@ type alias Decryptor key =
 {-| A block chaining algorithm.
 -}
 type alias Chainer key state =
-    state -> Encryptor key -> key -> Block -> ( state, Block )
+    state -> ( Encryptor key, Decryptor key ) -> key -> Block -> ( Block, state )
 
 
 {-| Adjoin chaining state to a list of ciphertext blocks.
@@ -105,7 +105,7 @@ type alias ChainingStateAdjoiner state =
 {-| Remove the adjoined state from a list of cipher blocks and turn it into a state.
 -}
 type alias ChainingStateSeparator state =
-    BlockSize -> List Int -> ( state, List Int )
+    BlockSize -> List Int -> ( List Int, state )
 
 
 {-| Create a random byte array of a given length

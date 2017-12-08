@@ -85,10 +85,10 @@ type alias DefaultKey =
 
 {-| Default configuration.
 -}
-defaultConfig : Config Aes.Key Chaining.EcbState randomState
+defaultConfig : Config Aes.Key Chaining.CtrState randomState
 defaultConfig =
     { encryption = Aes.encryption
-    , chaining = Chaining.ecbChaining
+    , chaining = Chaining.ctrChaining
     , encoding = defaultEncoding
     }
 
@@ -137,24 +137,24 @@ encryptList config generator (Key key) list =
         chainer =
             chaining.encryptor
 
-        encryptor =
-            encryption.encryptor
+        pair =
+            ( encryption.encryptor, encryption.decryptor )
 
         ( state, randomState ) =
             chaining.initializer generator encryption.blockSize
 
-        step : Block -> ( state, List Block ) -> ( state, List Block )
+        step : Block -> ( List Block, state ) -> ( List Block, state )
         step =
-            \block ( state, blocks ) ->
+            \block ( blocks, state ) ->
                 let
-                    ( outState, outBlock ) =
-                        chainer state encryptor key block
+                    ( outBlock, outState ) =
+                        chainer state pair key block
                 in
-                ( outState, outBlock :: blocks )
+                ( outBlock :: blocks, outState )
 
-        ( finalState, cipherBlocks ) =
+        ( cipherBlocks, finalState ) =
             listToBlocks encryption.blockSize list
-                |> List.foldl step ( state, [] )
+                |> List.foldl step ( [], state )
     in
     ( List.reverse cipherBlocks
         |> blocksToList
@@ -356,26 +356,26 @@ decryptList config (Key key) list =
         chainer =
             chaining.decryptor
 
-        decryptor =
-            encryption.decryptor
+        pair =
+            ( encryption.encryptor, encryption.decryptor )
 
-        ( state, cipherList ) =
+        ( cipherList, state ) =
             chaining.separator encryption.blockSize list
 
         cipherBlocks =
             listToBlocks encryption.blockSize cipherList
 
-        step : Block -> ( state, List Block ) -> ( state, List Block )
+        step : Block -> ( List Block, state ) -> ( List Block, state )
         step =
-            \block ( state, blocks ) ->
+            \block ( blocks, state ) ->
                 let
-                    ( state2, outBlock ) =
-                        chainer state decryptor key block
+                    ( outBlock, state2 ) =
+                        chainer state pair key block
                 in
-                ( state2, outBlock :: blocks )
+                ( outBlock :: blocks, state2 )
 
-        ( _, plainBlocks ) =
-            List.foldl step ( state, [] ) cipherBlocks
+        ( plainBlocks, _ ) =
+            List.foldl step ( [], state ) cipherBlocks
     in
     List.reverse plainBlocks
         |> blocksToList
