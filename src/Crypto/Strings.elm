@@ -47,9 +47,11 @@ config =
 
 {-| Encrypt a string. Encode the output as Base64 with 80-character lines.
 
+The `Seed` parameter is a `Random.Seed`, as created by `Random.initialSeed`
+
 See `Crypto.Strings.Crypt.encrypt` for more options.
 
-This shouldn't ever return an error, but since the key generation can possibly do so, it returns a Result instead of just (String, randomState).
+This shouldn't ever return an error, but since the key generation can possibly do so, it returns a `Result` instead of just `(Ciphertext, randomState)`.
 
 -}
 encrypt : Seed -> Types.Passphrase -> Types.Plaintext -> Result String ( Types.Ciphertext, Seed )
