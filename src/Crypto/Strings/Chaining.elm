@@ -51,18 +51,18 @@ type alias EcbState =
     ()
 
 
-emptyStateInitializer : ChainingInitializer randomState ()
+emptyStateInitializer : ChainingInitializer () randomState
 emptyStateInitializer generator _ =
     let
-        ( state, _ ) =
+        ( _, state ) =
             generator 0
     in
-    ( state, () )
+    ( (), state )
 
 
 {-| Electronic Codebook chaining
 -}
-ecbChaining : Chaining key randomState EcbState
+ecbChaining : Chaining key EcbState randomState
 ecbChaining =
     { name = "ECB Chaining"
     , initializer = emptyStateInitializer

@@ -14,9 +14,9 @@ module Crypto.Strings
     exposing
         ( RandomGenerator
         , decrypt
-        , dummyGenerator
         , encrypt
         , justEncrypt
+        , seedGenerator
         )
 
 {-| Block chaining and string encryption for use with any block cipher.
@@ -29,13 +29,14 @@ module Crypto.Strings
 
 # Functions
 
-@docs encrypt, justEncrypt, decrypt, dummyGenerator
+@docs encrypt, justEncrypt, decrypt, seedGenerator
 
 -}
 
 import Array
 import Crypto.Strings.Crypt as Crypt
 import Crypto.Strings.Types as Types
+import Random exposing (Seed)
 
 
 config =
@@ -53,39 +54,39 @@ type alias RandomGenerator randomState =
 This is about as non-random as it gets.
 
 -}
-dummyGenerator : RandomGenerator ()
-dummyGenerator blockSize =
-    ( (), Array.repeat blockSize 0 )
+seedGenerator : Seed -> RandomGenerator Seed
+seedGenerator =
+    Crypt.seedGenerator
 
 
 {-| Encrypt a string. Encode the output as Base64 with 80-character lines.
 
 See `Crypto.Strings.Crypt.encrypt` for more options.
 
-This shouldn't ever return an error, but since the key generation can possibly do so, it returns a Result instead of just (randomState, Strings).
+This shouldn't ever return an error, but since the key generation can possibly do so, it returns a Result instead of just (String, randomState).
 
 -}
-encrypt : RandomGenerator randomState -> String -> String -> Result String ( randomState, String )
-encrypt generator passphrase plaintext =
+encrypt : Seed -> String -> String -> Result String ( String, Seed )
+encrypt seed passphrase plaintext =
     case Crypt.expandKeyString config passphrase of
         Err msg ->
             Err msg
 
         Ok key ->
-            Ok <| Crypt.encrypt config generator key plaintext
+            Ok <| Crypt.encrypt config (seedGenerator seed) key plaintext
 
 
 {-| Testing function. Just returns the result with no random generator update.
 -}
-justEncrypt : RandomGenerator randomState -> String -> String -> String
-justEncrypt generator passphrase plaintext =
+justEncrypt : Seed -> String -> String -> String
+justEncrypt seed passphrase plaintext =
     case Crypt.expandKeyString config passphrase of
         Err msg ->
             ""
 
         Ok key ->
-            Crypt.encrypt config generator key plaintext
-                |> Tuple.second
+            Crypt.encrypt config (seedGenerator seed) key plaintext
+                |> Tuple.first
 
 
 {-| Decrypt a string created with `encrypt`.

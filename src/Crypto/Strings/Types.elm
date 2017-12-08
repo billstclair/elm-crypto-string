@@ -37,9 +37,9 @@ module Crypto.Strings.Types
 # Types
 
 @docs KeyExpander, Key, Config, BlockSize, Block
-@docs Encryption, Encryptor, Decryptor
+@docs Encryption, Encryptor, Decryptor, RandomGenerator
 @docs Encoding, Encoder, Decoder
-@docs Chaining, RandomGenerator, ChainingInitializer, Chainer
+@docs Chaining, ChainingInitializer, Chainer
 @docs ChainingStateAdjoiner, ChainingStateSeparator
 
 -}
@@ -111,20 +111,20 @@ type alias ChainingStateSeparator state =
 {-| Create a random byte array of a given length
 -}
 type alias RandomGenerator randomState =
-    BlockSize -> ( randomState, Block )
+    BlockSize -> ( Block, randomState )
 
 
 {-| Create an initial chaining state for encryption.
 -}
-type alias ChainingInitializer randomState state =
-    RandomGenerator randomState -> BlockSize -> ( randomState, state )
+type alias ChainingInitializer state randomState =
+    RandomGenerator randomState -> BlockSize -> ( state, randomState )
 
 
 {-| Package up all the information needed to do block chaining.
 -}
-type alias Chaining key randomState state =
+type alias Chaining key state randomState =
     { name : String
-    , initializer : ChainingInitializer randomState state
+    , initializer : ChainingInitializer state randomState
     , encryptor : Chainer key state
     , decryptor : Chainer key state
     , adjoiner : ChainingStateAdjoiner state
@@ -166,8 +166,8 @@ type alias Encryption key =
 
 {-| Configuration for the block chaining and string encoding
 -}
-type alias Config key randomState state =
+type alias Config key state randomState =
     { encryption : Encryption key
-    , chaining : Chaining key randomState state
+    , chaining : Chaining key state randomState
     , encoding : Encoding
     }

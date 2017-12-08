@@ -39,7 +39,7 @@ type alias Key =
 
 {-| AES encryption.
 -}
-encryption : Encryption AES.Keys
+encryption : Encryption Key
 encryption =
     { name = "AES"
     , blockSize = 16

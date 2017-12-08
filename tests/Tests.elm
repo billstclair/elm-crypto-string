@@ -3,9 +3,9 @@ module Tests exposing (all)
 import Crypto.Strings
     exposing
         ( decrypt
-        , dummyGenerator
         )
 import Expect exposing (Expectation)
+import Random exposing (Seed)
 import Test exposing (..)
 
 
@@ -82,13 +82,18 @@ doResultTest ( name, was, sb ) =
         )
 
 
+seed : Seed
+seed =
+    Random.initialSeed 0
+
+
 encrypt : String -> String -> Result String String
 encrypt passphrase plaintext =
-    case Crypto.Strings.encrypt dummyGenerator passphrase plaintext of
+    case Crypto.Strings.encrypt seed passphrase plaintext of
         Err msg ->
             Err msg
 
-        Ok ( _, res ) ->
+        Ok ( res, _ ) ->
             Ok res
 
 

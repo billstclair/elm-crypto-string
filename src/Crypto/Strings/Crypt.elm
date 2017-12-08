@@ -20,6 +20,7 @@ module Crypto.Strings.Crypt
         , expandKeyString
         , listToBlocks
         , padLastBlock
+        , seedGenerator
         , stripTrailingZeroes
         , unpadLastBlock
         )
@@ -34,7 +35,7 @@ module Crypto.Strings.Crypt
 
 # Functions
 
-@docs expandKeyString, defaultConfig, encrypt, decrypt
+@docs expandKeyString, defaultConfig, encrypt, decrypt, seedGenerator
 
 
 # Low-level functions
@@ -61,6 +62,7 @@ import Crypto.Strings.Types
         , RandomGenerator
         )
 import List.Extra as LE
+import Random
 
 
 {-| TODO
@@ -83,7 +85,7 @@ type alias DefaultKey =
 
 {-| Default configuration.
 -}
-defaultConfig : Config Aes.Key randomState Chaining.EcbState
+defaultConfig : Config Aes.Key Chaining.EcbState randomState
 defaultConfig =
     { encryption = Aes.encryption
     , chaining = Chaining.ecbChaining
@@ -93,7 +95,7 @@ defaultConfig =
 
 {-| Expand a key preparing it for use with `encrypt` or `decrypt`.
 -}
-expandKeyString : Config key randomState state -> String -> Result String (Key key)
+expandKeyString : Config key state randomState -> String -> Result String (Key key)
 expandKeyString config string =
     let
         expander =
@@ -107,9 +109,23 @@ expandKeyString config string =
             Ok <| Key key
 
 
+{-| A random generator that takes and returns a standard Elm Seed.
+-}
+seedGenerator : Random.Seed -> RandomGenerator Random.Seed
+seedGenerator seed blockSize =
+    let
+        gen =
+            Random.list blockSize <| Random.int 0 255
+
+        ( list, sd ) =
+            Random.step gen seed
+    in
+    ( Array.fromList list, sd )
+
+
 {-| Encrypt a list of blocks.
 -}
-encryptList : Config key randomState state -> RandomGenerator randomState -> Key key -> List Int -> ( randomState, List Int )
+encryptList : Config key state randomState -> RandomGenerator randomState -> Key key -> List Int -> ( List Int, randomState )
 encryptList config generator (Key key) list =
     let
         chaining =
@@ -124,7 +140,7 @@ encryptList config generator (Key key) list =
         encryptor =
             encryption.encryptor
 
-        ( randomState, state ) =
+        ( state, randomState ) =
             chaining.initializer generator encryption.blockSize
 
         step : Block -> ( state, List Block ) -> ( state, List Block )
@@ -140,22 +156,22 @@ encryptList config generator (Key key) list =
             listToBlocks encryption.blockSize list
                 |> List.foldl step ( state, [] )
     in
-    ( randomState
-    , List.reverse cipherBlocks
+    ( List.reverse cipherBlocks
         |> blocksToList
         |> chaining.adjoiner finalState
+    , randomState
     )
 
 
 {-| Encrypt a string.
 -}
-encrypt : Config key randomState state -> RandomGenerator randomState -> Key key -> String -> ( randomState, String )
+encrypt : Config key state randomState -> RandomGenerator randomState -> Key key -> String -> ( String, randomState )
 encrypt config generator key plaintext =
     Encoding.plainTextEncoder plaintext
         |> encryptList config generator key
-        |> (\( randomState, cipherList ) ->
-                ( randomState
-                , config.encoding.encoder cipherList
+        |> (\( cipherList, randomState ) ->
+                ( config.encoding.encoder cipherList
+                , randomState
                 )
            )
 
@@ -328,7 +344,7 @@ blocksToList blocks =
 
 {-| Decrypt a list of integers.
 -}
-decryptList : Config key randomState state -> Key key -> List Int -> List Int
+decryptList : Config key state randomState -> Key key -> List Int -> List Int
 decryptList config (Key key) list =
     let
         chaining =
@@ -367,7 +383,7 @@ decryptList config (Key key) list =
 
 {-| Decrypt a string created with `encrypt`.
 -}
-decrypt : Config key randomState state -> Key key -> String -> Result String String
+decrypt : Config key state randomState -> Key key -> String -> Result String String
 decrypt config key string =
     --This will use the blockchain algorithm and block encoder
     case config.encoding.decoder string of
