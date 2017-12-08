@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
-    "summary": "Tests for elm-crypto-string.",
-    "repository": "https://github.com/billstclair/elm-crypto-string.git",
+    "summary": "Tests for elm-crypto-strings.",
+    "repository": "https://github.com/billstclair/elm-crypto-strings.git",
     "license": "MIT",
     "source-directories": [
         ".",
