@@ -92,9 +92,24 @@ encrypt passphrase plaintext =
             Ok res
 
 
+decrypt : String -> String -> Result String String
+decrypt passphrase ciphertext =
+    Crypto.Strings.decrypt passphrase ciphertext
+
+
+encryptDecrypt : String -> String -> Result String String
+encryptDecrypt passphrase plaintext =
+    case encrypt passphrase plaintext of
+        Ok ciphertext ->
+            decrypt passphrase ciphertext
+
+        err ->
+            err
+
+
 {-| Tests that return integers
 -}
 stringData : List ( String, Result String String, Result String String )
 stringData =
-    [ ( "encrypt", encrypt passphrase "foo", Ok "foo" )
+    [ ( "encrypt-foo", encryptDecrypt passphrase "foo", Ok "foo" )
     ]

@@ -16,6 +16,7 @@ module Crypto.Strings
         , decrypt
         , dummyGenerator
         , encrypt
+        , justEncrypt
         )
 
 {-| Block chaining and string encryption for use with any block cipher.
@@ -28,7 +29,7 @@ module Crypto.Strings
 
 # Functions
 
-@docs encrypt, decrypt, dummyGenerator
+@docs encrypt, justEncrypt, decrypt, dummyGenerator
 
 -}
 
@@ -72,6 +73,19 @@ encrypt generator passphrase plaintext =
 
         Ok key ->
             Ok <| Crypt.encrypt config generator key plaintext
+
+
+{-| Testing function. Just returns the result with no random generator update.
+-}
+justEncrypt : RandomGenerator randomState -> String -> String -> String
+justEncrypt generator passphrase plaintext =
+    case Crypt.expandKeyString config passphrase of
+        Err msg ->
+            ""
+
+        Ok key ->
+            Crypt.encrypt config generator key plaintext
+                |> Tuple.second
 
 
 {-| Decrypt a string created with `encrypt`.

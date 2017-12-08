@@ -122,7 +122,7 @@ plainTextEncoder string =
         |> List.map Char.toCode
 
 
-{-| Decode UTF-8 bytes into a string. Sometimes this is not possible.
+{-| Decode UTF-8 bytes into a string.
 -}
 plainTextDecoder : List Int -> String
 plainTextDecoder list =
