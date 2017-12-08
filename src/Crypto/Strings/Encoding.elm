@@ -163,11 +163,12 @@ hexDecoder groupSize string =
                 String.toList string
                     |> LE.greedyGroupsOf groupSize
                     |> List.map String.fromList
+                    |> List.map String.toLower
                     |> List.map Hex.fromString
                     |> List.map (Result.withDefault -1)
         in
         if List.member -1 res then
-            Err "Invalid hexadecimal string"
+            Err <| "Invalid hexadecimal string: " ++ string
         else
             Ok res
 

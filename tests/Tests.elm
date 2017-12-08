@@ -1,9 +1,11 @@
 module Tests exposing (all)
 
-import Crypto.Strings
-    exposing
-        ( decrypt
-        )
+import Crypto.Strings exposing (decrypt)
+import Crypto.Strings.BlockAes as Aes
+import Crypto.Strings.Chaining as Chaining
+import Crypto.Strings.Crypt as Crypt
+import Crypto.Strings.Encoding as Encoding
+import Crypto.Strings.Types exposing (..)
 import Expect exposing (Expectation)
 import Random exposing (Seed)
 import Test exposing (..)
@@ -112,9 +114,54 @@ encryptDecrypt passphrase plaintext =
             err
 
 
+{-| This tests that ECB chaining and Hex encoding work.
+-}
+ecbConfig : Config Aes.Key Chaining.EcbState randomState
+ecbConfig =
+    { encryption = Aes.encryption
+    , chaining = Chaining.ecbChaining
+    , encoding = Encoding.hexEncoding
+    }
+
+
+ecbEncrypt : String -> String -> Result String String
+ecbEncrypt passphrase plaintext =
+    case Crypt.expandKeyString ecbConfig passphrase of
+        Err msg ->
+            Err msg
+
+        Ok key ->
+            let
+                ( res, _ ) =
+                    Crypt.encrypt ecbConfig (Crypt.seedGenerator seed) key plaintext
+            in
+            Ok res
+
+
+ecbDecrypt : String -> String -> Result String String
+ecbDecrypt passphrase ciphertext =
+    case Crypt.expandKeyString ecbConfig passphrase of
+        Err msg ->
+            Err msg
+
+        Ok key ->
+            Crypt.decrypt ecbConfig key ciphertext
+
+
+ecbEncryptDecrypt : String -> String -> Result String String
+ecbEncryptDecrypt passphrase plaintext =
+    case ecbEncrypt passphrase plaintext of
+        Ok ciphertext ->
+            ecbDecrypt passphrase ciphertext
+
+        err ->
+            err
+
+
 {-| Tests that return integers
 -}
 stringData : List ( String, Result String String, Result String String )
 stringData =
     [ ( "encrypt-foo", encryptDecrypt passphrase "foo", Ok "foo" )
+    , ( "encrypt-bar", ecbEncryptDecrypt passphrase "bar", Ok "bar" )
     ]

@@ -7,7 +7,7 @@
 
 The default encryption algorithm uses a standard Elm random number generator, for which you need to supply a seed integer, and, if you plan to encrypt more than once, save the returned seed for use the next time around.
 
-It uses [Counter Block Chaining] (https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)) (CTR) and [Advanced Encryption Standard](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) (AES) encryption. It hashes the keystring you give it to a 32-byte (256 bit) AES key.
+It uses Counter [Block Chaining](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation) (CTR) and [Advanced Encryption Standard](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) (AES) encryption. It hashes the keystring you give it to a 32-byte (256 bit) AES key.
 
 It encodes cipherstrings in Base64 with 60-character lines.
 
@@ -18,21 +18,14 @@ It encodes cipherstrings in Base64 with 60-character lines.
     import Crypto.Strings exposing (decrypt, encrypt)
     import Random exposing (Seed, initialSeed)
     
-    {-| In a real app,
-    you would get the time and initialize this in your update function.
-    And you would save the `Seed` resulting from a call to `doEncrypt`
-    for the next one.
-    -}
-    time : Int
-    time =
-        0
-    
     {-| In a real app, this would be user input
     -}
     passphrase : String
     passphrase =
         "My mother's maiden name."
     
+    {-| In real code, you'd pass in a seed created from a time, not a time.
+    -}
     doEncrypt : Int -> String -> Result String ( String, Seed )
     doEncrypt time plaintext =
         encrypt (initialSeed time) passphrase plaintext
@@ -63,4 +56,16 @@ This example is part of the distribution. You can run it as follows:
 
 # Advanced Usage
 
-Currently, ther
+Currently, you can also configure encryption using Electronic Codebook block chaining, which is not recommended for real applications, and you can encode the ciphertext as Hex instead of Base64. `Crypto.Strings.Example` contains a simple example of this. See `ecbConfig`. Once you grok the types, you can pretty easily create your own encoders and block chaining mechanisms, and you can plug in other block ciphers.
+
+Here's an example of running the ECB example code. Note that the time input makes no difference here. ECB uses no chaining and no initialization vector.
+
+    > ecbEncrypt 0 "foo" "bar"
+    Ok "00640061000C000C0057001D00B5006000F0000500C800B000BC0082008300DB"
+        : Result.Result String String
+    > ecbEncrypt 1 "foo" "bar"
+    Ok "00640061000C000C0057001D00B5006000F0000500C800B000BC0082008300DB"
+        : Result.Result String String
+    > ecbDecrypt "foo" "00640061000C000C0057001D00B5006000F0000500C800B000BC0082008300DB"
+    Ok "bar" : Result.Result String String
+
