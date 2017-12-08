@@ -16,10 +16,11 @@ module Crypto.Strings.Encoding
         , base64Encoder
         , base64Encoding
         , fold
+        , foldedSha256KeyEncoder
+        , foldedSha256KeyEncoding
         , hexDecoder
         , hexEncoder
         , hexEncoding
-        , keyEncoder
         , plainTextDecoder
         , plainTextEncoder
         )
@@ -27,12 +28,29 @@ module Crypto.Strings.Encoding
 {-| Encoders and decoders from and to strings and blocks.
 
 
-# Functions
+# `Config` elements
 
-@docs keyEncoder, fold
+
+## Key Encodings
+
+@docs foldedSha256KeyEncoding
+
+
+## Encodings
+
+@docs base64Encoding, hexEncoding
+
+
+# Translate between strings and byte lists.
+
 @docs plainTextDecoder, plainTextEncoder
-@docs base64Encoding, base64Encoder, base64Decoder
-@docs hexEncoding, hexEncoder, hexDecoder
+
+
+# Implementations of the `Config` elements
+
+@docs foldedSha256KeyEncoder, fold
+@docs base64Encoder, base64Decoder
+@docs hexEncoder, hexDecoder
 
 -}
 
@@ -41,7 +59,15 @@ import Base64
 import Bitwise
 import Char
 import Crypto.Hash exposing (sha256)
-import Crypto.Strings.Types exposing (Block, BlockSize, Decoder, Encoder, Encoding)
+import Crypto.Strings.Types
+    exposing
+        ( Block
+        , BlockSize
+        , Decoder
+        , Encoder
+        , Encoding
+        , KeyEncoding
+        )
 import Hex
 import List.Extra as LE
 import UTF8
@@ -49,8 +75,8 @@ import UTF8
 
 {-| Hash and fold a passphrase to turn it into a raw key array.
 -}
-keyEncoder : BlockSize -> String -> Block
-keyEncoder blockSize string =
+foldedSha256KeyEncoder : BlockSize -> String -> Block
+foldedSha256KeyEncoder blockSize string =
     sha256 string
         |> hexDecoder 2
         --The default will never happen. At least I hope it doesn't. :)
@@ -58,6 +84,15 @@ keyEncoder blockSize string =
             [ 102, 117, 99, 107, 32, 109, 101, 32, 104, 97, 114, 100, 101, 114 ]
         |> fold blockSize
         |> Array.fromList
+
+
+{-| A KeyEncoding for foldedSha256KeyEncoder
+-}
+foldedSha256KeyEncoding : KeyEncoding
+foldedSha256KeyEncoding =
+    { name = "Folded SHA256 Key Encoding"
+    , encoder = foldedSha256KeyEncoder
+    }
 
 
 {-| Fold a list of integers to a specified size.
@@ -137,7 +172,7 @@ hexEncoding : Encoding
 hexEncoding =
     { name = "Hex Encoding"
     , encoder = hexEncoder
-    , decoder = hexDecoder 4
+    , decoder = hexDecoder 2
     }
 
 
@@ -147,7 +182,7 @@ hexEncoder : List Int -> String
 hexEncoder list =
     List.map Hex.toString list
         |> List.map String.toUpper
-        |> List.map (String.padLeft 4 '0')
+        |> List.map (String.padLeft 2 '0')
         |> String.concat
 
 

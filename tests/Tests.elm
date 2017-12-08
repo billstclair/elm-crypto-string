@@ -119,6 +119,7 @@ encryptDecrypt passphrase plaintext =
 ecbConfig : Config Aes.Key Chaining.EcbState randomState
 ecbConfig =
     { encryption = Aes.encryption
+    , keyEncoding = Encoding.foldedSha256KeyEncoding
     , chaining = Chaining.ecbChaining
     , encoding = Encoding.hexEncoding
     }

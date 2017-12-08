@@ -40,6 +40,7 @@ import Random exposing (Seed)
 config : Types.Config Aes.Key Chaining.CtrState randomState
 config =
     { encryption = Aes.encryption
+    , keyEncoding = Encoding.foldedSha256KeyEncoding
     , chaining = Chaining.ctrChaining
     , encoding = Encoding.base64Encoding 60
     }

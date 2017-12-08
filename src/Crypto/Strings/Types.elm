@@ -28,6 +28,8 @@ module Crypto.Strings.Types
         , Encryption
         , Encryptor
         , Key(..)
+        , KeyEncoder
+        , KeyEncoding
         , KeyExpander
         , Passphrase
         , Plaintext
@@ -42,6 +44,7 @@ module Crypto.Strings.Types
 @docs Passphrase, Plaintext, Ciphertext
 @docs KeyExpander, Key, Config, BlockSize, Block
 @docs Encryption, Encryptor, Decryptor, RandomGenerator
+@docs KeyEncoding, KeyEncoder
 @docs Encoding, Encoder, Decoder
 @docs Chaining, ChainingInitializer, Chainer
 @docs ChainingStateAdjoiner, ChainingStateSeparator
@@ -154,6 +157,23 @@ type alias Chaining key state randomState =
     }
 
 
+{-| Turn a passphrase into an IV.
+-}
+type alias KeyEncoder =
+    BlockSize -> Passphrase -> Block
+
+
+{-| Describe a `KeyEncoder` for a `Config`.
+
+Not all `KeyEncodings` will be compatible with all block `Encryption` types.
+
+-}
+type alias KeyEncoding =
+    { name : String
+    , encoder : KeyEncoder
+    }
+
+
 {-| A string encoding algorithm.
 -}
 type alias Encoder =
@@ -190,6 +210,7 @@ type alias Encryption key =
 -}
 type alias Config key state randomState =
     { encryption : Encryption key
+    , keyEncoding : KeyEncoding
     , chaining : Chaining key state randomState
     , encoding : Encoding
     }

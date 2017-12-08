@@ -59,6 +59,7 @@ import Crypto.Strings.Types
         , Encoding
         , Encryptor
         , Key(..)
+        , KeyEncoding
         , KeyExpander
         , Passphrase
         , Plaintext
@@ -70,9 +71,16 @@ import Random
 
 {-| TODO
 -}
-processKey : KeyExpander key -> String -> Result String key
-processKey expander string =
-    Encoding.keyEncoder expander.keySize string
+processKey : Config key state randomState -> String -> Result String key
+processKey config string =
+    let
+        expander =
+            config.encryption.keyExpander
+
+        keyEncoder =
+            config.keyEncoding.encoder
+    in
+    keyEncoder expander.keySize string
         |> expander.expander
 
 
@@ -90,7 +98,8 @@ type alias DefaultKey =
 -}
 defaultConfig : Config Aes.Key Chaining.CtrState randomState
 defaultConfig =
-    { encryption = Aes.encryption
+    { keyEncoding = Encoding.foldedSha256KeyEncoding
+    , encryption = Aes.encryption
     , chaining = Chaining.ctrChaining
     , encoding = defaultEncoding
     }
@@ -100,11 +109,7 @@ defaultConfig =
 -}
 expandKeyString : Config key state randomState -> Passphrase -> Result String (Key key)
 expandKeyString config passphrase =
-    let
-        expander =
-            config.encryption.keyExpander
-    in
-    case processKey expander passphrase of
+    case processKey config passphrase of
         Err msg ->
             Err msg
 

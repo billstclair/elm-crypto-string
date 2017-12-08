@@ -1,4 +1,4 @@
-[![elm-package](https://img.shields.io/badge/elm-1.0.3-blue.svg)](http://package.elm-lang.org/packages/billstclair/elm-crypto-string/latest)
+[![elm-package](https://img.shields.io/badge/elm-2.0.0-blue.svg)](http://package.elm-lang.org/packages/billstclair/elm-crypto-string/latest)
 [![Build Status](https://travis-ci.org/billstclair/elm-crypto-string.svg?branch=master)](https://travis-ci.org/billstclair/elm-crypto-string)
 
 `billstclair/elm-crypto-string` does block chaining and string conversion for encrypting strings. It is designed to plug in to any low-level, block-based encryption module that can be made to follow its protocol. It ships knowing how to talk to [`billstclair/elm-crypto-aes`](http://package.elm-lang.org/packages/billstclair/elm-crypto-aes/latest), a pure Elm rendering of the Advanced Encryption Standard.
@@ -32,7 +32,7 @@ It encodes cipherstrings in Base64 with 60-character lines.
 This example is part of the distribution. You can run it as follows:
 
     $ git clone https://github.com/billstclair/elm-crypto-string.git
-    $ cd elm-crypt-strings
+    $ cd elm-crypto-string
     $ elm repl
     ---- elm-repl 0.18.0 -----------------------------------------------------------
      :help for help, :exit to exit, more at <https://github.com/elm-lang/elm-repl>
@@ -58,11 +58,11 @@ Currently, you can also configure encryption using Electronic Codebook block cha
 Here's an example of running the ECB example code. Note that the time input makes no difference here. ECB uses no chaining and no initialization vector.
 
     > ecbEncrypt 0 "foo" "bar"
-    Ok "00640061000C000C0057001D00B5006000F0000500C800B000BC0082008300DB"
+    Ok "64610C0C571DB560F005C8B0BC8283DB"
         : Result.Result String String
     > ecbEncrypt 1 "foo" "bar"
-    Ok "00640061000C000C0057001D00B5006000F0000500C800B000BC0082008300DB"
+    Ok "64610C0C571DB560F005C8B0BC8283DB"
         : Result.Result String String
-    > ecbDecrypt "foo" "00640061000C000C0057001D00B5006000F0000500C800B000BC0082008300DB"
+    > ecbDecrypt "foo" "64610C0C571DB560F005C8B0BC8283DB"
     Ok "bar" : Result.Result String String
 
