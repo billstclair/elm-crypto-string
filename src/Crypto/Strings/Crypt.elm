@@ -53,12 +53,15 @@ import Crypto.Strings.Types
     exposing
         ( Block
         , BlockSize
+        , Ciphertext
         , Config
         , Decryptor
         , Encoding
         , Encryptor
         , Key(..)
         , KeyExpander
+        , Passphrase
+        , Plaintext
         , RandomGenerator
         )
 import List.Extra as LE
@@ -95,13 +98,13 @@ defaultConfig =
 
 {-| Expand a key preparing it for use with `encrypt` or `decrypt`.
 -}
-expandKeyString : Config key state randomState -> String -> Result String (Key key)
-expandKeyString config string =
+expandKeyString : Config key state randomState -> Passphrase -> Result String (Key key)
+expandKeyString config passphrase =
     let
         expander =
             config.encryption.keyExpander
     in
-    case processKey expander string of
+    case processKey expander passphrase of
         Err msg ->
             Err msg
 
@@ -165,7 +168,7 @@ encryptList config generator (Key key) list =
 
 {-| Encrypt a string.
 -}
-encrypt : Config key state randomState -> RandomGenerator randomState -> Key key -> String -> ( String, randomState )
+encrypt : Config key state randomState -> RandomGenerator randomState -> Key key -> Plaintext -> ( Ciphertext, randomState )
 encrypt config generator key plaintext =
     Encoding.plainTextEncoder plaintext
         |> encryptList config generator key
@@ -383,7 +386,7 @@ decryptList config (Key key) list =
 
 {-| Decrypt a string created with `encrypt`.
 -}
-decrypt : Config key state randomState -> Key key -> String -> Result String String
+decrypt : Config key state randomState -> Key key -> Ciphertext -> Result Plaintext String
 decrypt config key string =
     --This will use the blockchain algorithm and block encoder
     case config.encoding.decoder string of

@@ -19,6 +19,7 @@ module Crypto.Strings.Types
         , ChainingInitializer
         , ChainingStateAdjoiner
         , ChainingStateSeparator
+        , Ciphertext
         , Config
         , Decoder
         , Decryptor
@@ -28,6 +29,8 @@ module Crypto.Strings.Types
         , Encryptor
         , Key(..)
         , KeyExpander
+        , Passphrase
+        , Plaintext
         , RandomGenerator
         )
 
@@ -36,6 +39,7 @@ module Crypto.Strings.Types
 
 # Types
 
+@docs Passphrase, Plaintext, Ciphertext
 @docs KeyExpander, Key, Config, BlockSize, Block
 @docs Encryption, Encryptor, Decryptor, RandomGenerator
 @docs Encoding, Encoder, Decoder
@@ -45,6 +49,24 @@ module Crypto.Strings.Types
 -}
 
 import Array exposing (Array)
+
+
+{-| Another name for `String`, to aid in documentation.
+-}
+type alias Passphrase =
+    String
+
+
+{-| Another name for `String`, to aid in documentation.
+-}
+type alias Plaintext =
+    String
+
+
+{-| Another name for `String`, to aid in documentation.
+-}
+type alias Ciphertext =
+    String
 
 
 {-| A portable name for block encryption algorithm specific keys.

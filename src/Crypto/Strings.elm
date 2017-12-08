@@ -52,7 +52,7 @@ See `Crypto.Strings.Crypt.encrypt` for more options.
 This shouldn't ever return an error, but since the key generation can possibly do so, it returns a Result instead of just (String, randomState).
 
 -}
-encrypt : Seed -> String -> String -> Result String ( String, Seed )
+encrypt : Seed -> Types.Passphrase -> Types.Plaintext -> Result String ( Types.Ciphertext, Seed )
 encrypt seed passphrase plaintext =
     case Crypt.expandKeyString config passphrase of
         Err msg ->
@@ -64,7 +64,7 @@ encrypt seed passphrase plaintext =
 
 {-| Testing function. Just returns the result with no random generator update.
 -}
-justEncrypt : Seed -> String -> String -> String
+justEncrypt : Seed -> Types.Passphrase -> Types.Plaintext -> Types.Ciphertext
 justEncrypt seed passphrase plaintext =
     case Crypt.expandKeyString config passphrase of
         Err msg ->
@@ -82,7 +82,7 @@ See `Crypto.Strings.Crypt.decrypt` for more options.
 This can get errors if the ciphertext you pass in decrypts to something that isn't a UTF-8 string.
 
 -}
-decrypt : String -> String -> Result String String
+decrypt : Types.Passphrase -> Types.Ciphertext -> Result String Types.Plaintext
 decrypt passphrase ciphertext =
     case Crypt.expandKeyString config passphrase of
         Err msg ->

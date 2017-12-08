@@ -27,22 +27,15 @@ import Crypto.Strings.Types exposing (..)
 import Random exposing (Seed, initialSeed)
 
 
-{-| In a real app, this would be user input
--}
-passphrase : String
-passphrase =
-    "My mother's maiden name."
-
-
 {-| In real code, you'd pass in a seed created from a time, not a time.
 -}
-doEncrypt : Int -> String -> Result String ( String, Seed )
-doEncrypt time plaintext =
+doEncrypt : Int -> Passphrase -> Plaintext -> Result String ( Ciphertext, Seed )
+doEncrypt time passphrase plaintext =
     encrypt (initialSeed time) passphrase plaintext
 
 
-doDecrypt : String -> Result String String
-doDecrypt ciphertext =
+doDecrypt : Passphrase -> Ciphertext -> Result String Plaintext
+doDecrypt passphrase ciphertext =
     decrypt passphrase ciphertext
 
 
@@ -63,7 +56,7 @@ seedGenerator time =
 
 {-| In real code, you'd pass in a seed created from a time, not a time.
 -}
-ecbEncrypt : Int -> String -> String -> Result String String
+ecbEncrypt : Int -> Passphrase -> Plaintext -> Result String Ciphertext
 ecbEncrypt time passphrase plaintext =
     case Crypt.expandKeyString ecbConfig passphrase of
         Err msg ->
@@ -77,7 +70,7 @@ ecbEncrypt time passphrase plaintext =
             Ok res
 
 
-ecbDecrypt : String -> String -> Result String String
+ecbDecrypt : Passphrase -> Ciphertext -> Result String Plaintext
 ecbDecrypt passphrase ciphertext =
     case Crypt.expandKeyString ecbConfig passphrase of
         Err msg ->

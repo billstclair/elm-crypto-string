@@ -16,22 +16,17 @@ It encodes cipherstrings in Base64 with 60-character lines.
     module Crypto.Strings.Example exposing (doDecrypt, doEncrypt)
     
     import Crypto.Strings exposing (decrypt, encrypt)
+    import Crypto.Types exposing (Passphrase, Plaintext, Ciphertext)
     import Random exposing (Seed, initialSeed)
-    
-    {-| In a real app, this would be user input
-    -}
-    passphrase : String
-    passphrase =
-        "My mother's maiden name."
     
     {-| In real code, you'd pass in a seed created from a time, not a time.
     -}
-    doEncrypt : Int -> String -> Result String ( String, Seed )
-    doEncrypt time plaintext =
+    doEncrypt : Int -> Passphrase -> Plaintext -> Result String ( Ciphertext, Seed )
+    doEncrypt time passphrase plaintext =
         encrypt (initialSeed time) passphrase plaintext
     
-    doDecrypt : String -> Result String String
-    doDecrypt ciphertext =
+    doDecrypt : Passphrase -> Ciphertext -> Result String Plaintext
+    doDecrypt passphrase ciphertext =
         decrypt passphrase ciphertext
 
 This example is part of the distribution. You can run it as follows:
@@ -43,16 +38,18 @@ This example is part of the distribution. You can run it as follows:
      :help for help, :exit to exit, more at <https://github.com/elm-lang/elm-repl>
     --------------------------------------------------------------------------------
     > import Crypto.Strings.Example exposing (..)
-    > doEncrypt 0 "foo"
-    Ok ("rYcxCPIdEyvT4C/AJlb4h9gqRRMIVFHaBA7YCkwSZBk=",Seed { state = State 2124954851 1554910725, next = <function>, split = <function>, range = <function> })
-        : Result.Result String ( String, Random.Seed )
-    > doDecrypt "rYcxCPIdEyvT4C/AJlb4h9gqRRMIVFHaBA7YCkwSZBk="
-    Ok "foo" : Result.Result String String
-    > doEncrypt 1 "foo"
-    Ok ("UaC72fT1tLW2Ur+DRI1Sv4/qaUdv0Xz6tcY/2raM5C4=",Seed { state = State 2102426139 1554910725, next = <function>, split = <function>, range = <function> })
-        : Result.Result String ( String, Random.Seed )
-    > doDecrypt "UaC72fT1tLW2Ur+DRI1Sv4/qaUdv0Xz6tcY/2raM5C4="
-    Ok "foo" : Result.Result String String
+    > doEncrypt 0 "foo" "bar"
+    Ok ("rYcxCPIdEyvT4C/AJlb4hzZUJr/izK+q/C0LPbqKSfI=",Seed { state = State 2124954851 1554910725, next = <function>, split = <function>, range = <function> })
+        : Result.Result
+            String ( Crypto.Strings.Types.Ciphertext, Random.Seed )
+    > doDecrypt "foo" "rYcxCPIdEyvT4C/AJlb4hzZUJr/izK+q/C0LPbqKSfI="
+    Ok "bar" : Result.Result String Crypto.Strings.Types.Plaintext
+    > doEncrypt 1 "foo" "bar"
+    Ok ("UaC72fT1tLW2Ur+DRI1Sv+AiAGSnNT06NGzHS80tmz0=",Seed { state = State 2102426139 1554910725, next = <function>, split = <function>, range = <function> })
+        : Result.Result
+            String ( Crypto.Strings.Types.Ciphertext, Random.Seed )
+    > doDecrypt "foo" "UaC72fT1tLW2Ur+DRI1Sv+AiAGSnNT06NGzHS80tmz0="
+    Ok "bar" : Result.Result String Crypto.Strings.Types.Plaintext
 
 # Advanced Usage
 
