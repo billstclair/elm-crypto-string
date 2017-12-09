@@ -251,10 +251,6 @@ base64Encoder lineLength list =
 
 
 {-| Convert a Base64 string to bytes. Sometimes the string is malformed.
-
-TODO: This should return a Block, and the Chaining.remover should
-convert it into a list of Blocks.
-
 -}
 base64Decoder : String -> Result String (List Int)
 base64Decoder string =

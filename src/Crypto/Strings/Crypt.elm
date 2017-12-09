@@ -69,8 +69,6 @@ import List.Extra as LE
 import Random
 
 
-{-| TODO
--}
 processKey : Config key state randomState -> String -> Result String key
 processKey config string =
     let

@@ -10,19 +10,19 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.Strings.BlockAes exposing (Key, encryption)
+module Crypto.Strings.BlockAes exposing (Key, KeySize(..), encryption, setKeySize)
 
 {-| Connect Crypto.AES to Crypto.Strings.Crypt
 
 
 # Types
 
-@docs Key
+@docs Key, KeySize
 
 
 # Functions
 
-@docs encryption
+@docs encryption, setKeySize
 
 -}
 
@@ -37,7 +37,7 @@ type alias Key =
     AES.Keys
 
 
-{-| AES encryption.
+{-| AES encryption. 32-byte key size. Use `setKeySize` to change it.
 -}
 encryption : Encryption Key
 encryption =
@@ -56,8 +56,38 @@ keyExpander =
     }
 
 
+{-| An AES key size. 16, 24, or 32 bytes.
+-}
+type KeySize
+    = KeySize16
+    | KeySize24
+    | KeySize32
 
--- TODO: setKeySize : Int -> KeyExpander AES.Keys -> KeyExpander AES.Keys
+
+keySizeToInt : KeySize -> Int
+keySizeToInt keySize =
+    case keySize of
+        KeySize16 ->
+            16
+
+        KeySize24 ->
+            24
+
+        KeySize32 ->
+            32
+
+
+{-| Change the key size of the keyExpander inside an AES Encryption spec.
+-}
+setKeySize : KeySize -> Encryption Key -> Encryption Key
+setKeySize keySize encryption =
+    let
+        expander =
+            encryption.keyExpander
+    in
+    { encryption
+        | keyExpander = { expander | keySize = keySizeToInt keySize }
+    }
 
 
 encrypt : AES.Keys -> Block -> Block

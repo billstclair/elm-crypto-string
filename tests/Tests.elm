@@ -114,10 +114,14 @@ encryptDecrypt passphrase plaintext =
             err
 
 
+type alias EcbConfig =
+    Config Aes.Key Chaining.EcbState Seed
+
+
 {-| This tests that ECB chaining and Hex encoding work.
 -}
-ecbConfig : Config Aes.Key Chaining.EcbState randomState
-ecbConfig =
+ecbConfig32 : EcbConfig
+ecbConfig32 =
     { encryption = Aes.encryption
     , keyEncoding = Encoding.foldedSha256KeyEncoding
     , chaining = Chaining.ecbChaining
@@ -125,35 +129,51 @@ ecbConfig =
     }
 
 
-ecbEncrypt : String -> String -> Result String String
-ecbEncrypt passphrase plaintext =
-    case Crypt.expandKeyString ecbConfig passphrase of
+ecbConfig16 : EcbConfig
+ecbConfig16 =
+    { ecbConfig32
+        | encryption =
+            Aes.setKeySize Aes.KeySize16 Aes.encryption
+    }
+
+
+ecbConfig24 : EcbConfig
+ecbConfig24 =
+    { ecbConfig32
+        | encryption =
+            Aes.setKeySize Aes.KeySize24 Aes.encryption
+    }
+
+
+ecbEncrypt : EcbConfig -> String -> String -> Result String String
+ecbEncrypt config passphrase plaintext =
+    case Crypt.expandKeyString config passphrase of
         Err msg ->
             Err msg
 
         Ok key ->
             let
                 ( res, _ ) =
-                    Crypt.encrypt ecbConfig (Crypt.seedGenerator seed) key plaintext
+                    Crypt.encrypt config (Crypt.seedGenerator seed) key plaintext
             in
             Ok res
 
 
-ecbDecrypt : String -> String -> Result String String
-ecbDecrypt passphrase ciphertext =
-    case Crypt.expandKeyString ecbConfig passphrase of
+ecbDecrypt : EcbConfig -> String -> String -> Result String String
+ecbDecrypt config passphrase ciphertext =
+    case Crypt.expandKeyString config passphrase of
         Err msg ->
             Err msg
 
         Ok key ->
-            Crypt.decrypt ecbConfig key ciphertext
+            Crypt.decrypt config key ciphertext
 
 
-ecbEncryptDecrypt : String -> String -> Result String String
-ecbEncryptDecrypt passphrase plaintext =
-    case ecbEncrypt passphrase plaintext of
+ecbEncryptDecrypt : EcbConfig -> String -> String -> Result String String
+ecbEncryptDecrypt config passphrase plaintext =
+    case ecbEncrypt config passphrase plaintext of
         Ok ciphertext ->
-            ecbDecrypt passphrase ciphertext
+            ecbDecrypt config passphrase ciphertext
 
         err ->
             err
@@ -164,5 +184,7 @@ ecbEncryptDecrypt passphrase plaintext =
 stringData : List ( String, Result String String, Result String String )
 stringData =
     [ ( "encrypt-foo", encryptDecrypt passphrase "foo", Ok "foo" )
-    , ( "encrypt-bar", ecbEncryptDecrypt passphrase "bar", Ok "bar" )
+    , ( "encrypt-bar-16", ecbEncryptDecrypt ecbConfig16 passphrase "bar", Ok "bar" )
+    , ( "encrypt-bar-24", ecbEncryptDecrypt ecbConfig24 passphrase "bar", Ok "bar" )
+    , ( "encrypt-bar-32", ecbEncryptDecrypt ecbConfig32 passphrase "bar", Ok "bar" )
     ]
