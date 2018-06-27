@@ -10,6 +10,7 @@
     "exposed-modules": [],
     "dependencies": {
         "billstclair/elm-crypto-aes": "1.0.4 <= v < 2.0.0",
+        "billstclair/elm-recovered-utf8": "1.0.0 <= v < 2.0.0",
         "elm-community/array-extra": "1.0.2 <= v < 2.0.0",
         "elm-community/list-extra": "6.1.0 <= v < 7.0.0",
         "elm-lang/core": "5.1.1 <= v < 6.0.0",

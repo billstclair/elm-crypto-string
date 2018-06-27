@@ -70,7 +70,7 @@ import Crypto.Strings.Types
         )
 import Hex
 import List.Extra as LE
-import UTF8
+import Recovered.UTF8
 
 
 {-| Hash and fold a passphrase to turn it into a raw key array.
@@ -152,7 +152,7 @@ isOdd x =
 -}
 plainTextEncoder : String -> List Int
 plainTextEncoder string =
-    UTF8.toSingleByte string
+    Recovered.UTF8.toSingleByte string
         |> String.toList
         |> List.map Char.toCode
 
@@ -163,7 +163,7 @@ plainTextDecoder : List Int -> String
 plainTextDecoder list =
     List.map Char.fromCode list
         |> String.fromList
-        |> UTF8.toMultiByte
+        |> Recovered.UTF8.toMultiByte
 
 
 {-| How to encode/decode strings to/from hex.
