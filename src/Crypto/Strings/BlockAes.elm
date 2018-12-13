@@ -10,7 +10,10 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.Strings.BlockAes exposing (Key, KeySize(..), encryption, setKeySize)
+module Crypto.Strings.BlockAes exposing
+    ( Key, KeySize(..)
+    , encryption, setKeySize
+    )
 
 {-| Connect Crypto.AES to Crypto.Strings.Crypt
 
@@ -80,12 +83,12 @@ keySizeToInt keySize =
 {-| Change the key size of the keyExpander inside an AES Encryption spec.
 -}
 setKeySize : KeySize -> Encryption Key -> Encryption Key
-setKeySize keySize encryption =
+setKeySize keySize encryption_ =
     let
         expander =
-            encryption.keyExpander
+            encryption_.keyExpander
     in
-    { encryption
+    { encryption_
         | keyExpander = { expander | keySize = keySizeToInt keySize }
     }
 
