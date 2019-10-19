@@ -3,7 +3,7 @@
     "name": "billstclair/elm-crypto-string",
     "summary": "elm-crypto-string does block chaining for string encryption.",
     "license": "MIT",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "exposed-modules": [
         "Crypto.Strings",
         "Crypto.Strings.Types",
