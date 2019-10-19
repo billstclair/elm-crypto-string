@@ -10,20 +10,14 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.Strings.Encoding
-    exposing
-        ( base64Decoder
-        , base64Encoder
-        , base64Encoding
-        , fold
-        , foldedSha256KeyEncoder
-        , foldedSha256KeyEncoding
-        , hexDecoder
-        , hexEncoder
-        , hexEncoding
-        , plainTextDecoder
-        , plainTextEncoder
-        )
+module Crypto.Strings.Encoding exposing
+    ( foldedSha256KeyEncoding
+    , base64Encoding, hexEncoding
+    , plainTextDecoder, plainTextEncoder
+    , foldedSha256KeyEncoder, fold
+    , base64Encoder, base64Decoder
+    , hexEncoder, hexDecoder
+    )
 
 {-| Encoders and decoders from and to strings and blocks.
 
@@ -110,14 +104,17 @@ fold size list =
     in
     if len == size then
         list
+
     else if len < size then
         List.append list list
             |> fold size
+
     else if len > size * 2 then
         let
             l =
                 if isOdd len then
                     0 :: list
+
                 else
                     list
 
@@ -126,6 +123,7 @@ fold size list =
         in
         List.map2 Bitwise.xor (List.take ln l) (List.drop ln l)
             |> fold size
+
     else
         let
             left =
@@ -190,8 +188,9 @@ hexEncoder list =
 -}
 hexDecoder : Int -> String -> Result String (List Int)
 hexDecoder groupSize string =
-    if String.length string % groupSize /= 0 then
-        Err <| "String length not a multiple of " ++ toString groupSize
+    if modBy groupSize (String.length string) /= 0 then
+        Err <| "String length not a multiple of " ++ String.fromInt groupSize
+
     else
         let
             res =
@@ -204,6 +203,7 @@ hexDecoder groupSize string =
         in
         if List.member -1 res then
             Err <| "Invalid hexadecimal string: " ++ string
+
         else
             Ok res
 
@@ -221,25 +221,27 @@ base64Encoding lineLength =
     }
 
 
+loop : Int -> String -> List String -> String
+loop lineLength =
+    \tail res ->
+        if String.length tail <= lineLength then
+            (tail :: res)
+                |> List.reverse
+                |> String.join "\n"
+
+        else
+            loop lineLength (String.dropLeft lineLength tail) <|
+                String.left lineLength tail
+                    :: res
+
+
 splitLines : Int -> String -> String
 splitLines lineLength string =
     if lineLength <= 0 then
         string
+
     else
-        let
-            loop : String -> List String -> String
-            loop =
-                \tail res ->
-                    if String.length tail <= lineLength then
-                        (tail :: res)
-                            |> List.reverse
-                            |> String.join "\n"
-                    else
-                        loop (String.dropLeft lineLength tail) <|
-                            String.left lineLength tail
-                                :: res
-        in
-        loop string []
+        loop lineLength string []
 
 
 {-| Convert bytes to Base64.
@@ -247,7 +249,8 @@ splitLines lineLength string =
 base64Encoder : Int -> List Int -> String
 base64Encoder lineLength list =
     Base64.encode list
-        |> splitLines lineLength
+        |> Result.map (splitLines lineLength)
+        |> Result.withDefault ""
 
 
 {-| Convert a Base64 string to bytes. Sometimes the string is malformed.

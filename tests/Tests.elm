@@ -44,6 +44,7 @@ maybeLog : String -> a -> a
 maybeLog label value =
     if enableLogging then
         log label value
+
     else
         value
 
@@ -57,8 +58,9 @@ expectResult sb was =
                     Expect.true "You shouldn't ever see this." True
 
                 Ok _ ->
-                    Expect.false (toString err) True
+                    Expect.false "dunno what is going on here" True
 
+        --Expect.false err True
         Ok wasv ->
             case sb of
                 Err _ ->
@@ -90,8 +92,8 @@ seed =
 
 
 encrypt : String -> String -> Result String String
-encrypt passphrase plaintext =
-    case Crypto.Strings.encrypt seed passphrase plaintext of
+encrypt passphrase_ plaintext =
+    case Crypto.Strings.encrypt seed passphrase_ plaintext of
         Err msg ->
             Err msg
 
@@ -100,15 +102,15 @@ encrypt passphrase plaintext =
 
 
 decrypt : String -> String -> Result String String
-decrypt passphrase ciphertext =
-    Crypto.Strings.decrypt passphrase ciphertext
+decrypt passphrase_ ciphertext =
+    Crypto.Strings.decrypt passphrase_ ciphertext
 
 
 encryptDecrypt : String -> String -> Result String String
-encryptDecrypt passphrase plaintext =
-    case encrypt passphrase plaintext of
+encryptDecrypt passphrase_ plaintext =
+    case encrypt passphrase_ plaintext of
         Ok ciphertext ->
-            decrypt passphrase ciphertext
+            decrypt passphrase_ ciphertext
 
         err ->
             err
@@ -146,8 +148,8 @@ ecbConfig24 =
 
 
 ecbEncrypt : EcbConfig -> String -> String -> Result String String
-ecbEncrypt config passphrase plaintext =
-    case Crypt.expandKeyString config passphrase of
+ecbEncrypt config passphrase_ plaintext =
+    case Crypt.expandKeyString config passphrase_ of
         Err msg ->
             Err msg
 
@@ -160,8 +162,8 @@ ecbEncrypt config passphrase plaintext =
 
 
 ecbDecrypt : EcbConfig -> String -> String -> Result String String
-ecbDecrypt config passphrase ciphertext =
-    case Crypt.expandKeyString config passphrase of
+ecbDecrypt config passphrase_ ciphertext =
+    case Crypt.expandKeyString config passphrase_ of
         Err msg ->
             Err msg
 
@@ -170,10 +172,10 @@ ecbDecrypt config passphrase ciphertext =
 
 
 ecbEncryptDecrypt : EcbConfig -> String -> String -> Result String String
-ecbEncryptDecrypt config passphrase plaintext =
-    case ecbEncrypt config passphrase plaintext of
+ecbEncryptDecrypt config passphrase_ plaintext =
+    case ecbEncrypt config passphrase_ plaintext of
         Ok ciphertext ->
-            ecbDecrypt config passphrase ciphertext
+            ecbDecrypt config passphrase_ ciphertext
 
         err ->
             err

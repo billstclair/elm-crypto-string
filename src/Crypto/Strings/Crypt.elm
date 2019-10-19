@@ -10,20 +10,12 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.Strings.Crypt
-    exposing
-        ( DefaultKey
-        , blocksToList
-        , decrypt
-        , defaultConfig
-        , encrypt
-        , expandKeyString
-        , listToBlocks
-        , padLastBlock
-        , seedGenerator
-        , stripTrailingZeroes
-        , unpadLastBlock
-        )
+module Crypto.Strings.Crypt exposing
+    ( DefaultKey
+    , expandKeyString, defaultConfig, encrypt, decrypt, seedGenerator
+    , listToBlocks, blocksToList
+    , padLastBlock, unpadLastBlock, stripTrailingZeroes
+    )
 
 {-| Block chaining and string encryption for use with any block cipher.
 
@@ -151,10 +143,10 @@ encryptList config generator (Key key) list =
 
         step : Block -> ( List Block, state ) -> ( List Block, state )
         step =
-            \block ( blocks, state ) ->
+            \block ( blocks, state_ ) ->
                 let
                     ( outBlock, outState ) =
-                        chainer state pair key block
+                        chainer state_ pair key block
                 in
                 ( outBlock :: blocks, outState )
 
@@ -190,6 +182,7 @@ extendArray size fill array =
     in
     if count <= 0 then
         array
+
     else
         Array.append array <| Array.repeat count fill
 
@@ -199,6 +192,59 @@ marker =
     0x80
 
 
+padLastBlockLoop : Int -> List Block -> List Block -> List Block
+padLastBlockLoop blockSize =
+    \blocks res ->
+        case blocks of
+            [] ->
+                []
+
+            [ blk ] ->
+                let
+                    block =
+                        stripTrailingZeroes blk
+
+                    len =
+                        Array.length block
+
+                    last =
+                        Maybe.withDefault 0 <|
+                            Array.get (len - 1) block
+
+                    ( b, bs, ln ) =
+                        if len == blockSize && (last == 0 || last == marker) then
+                            ( Array.fromList [ marker ]
+                            , [ block ]
+                            , 1
+                            )
+
+                        else if len < blockSize then
+                            ( Array.push marker block
+                            , []
+                            , len + 1
+                            )
+
+                        else
+                            ( block
+                            , []
+                            , len
+                            )
+
+                    b2 =
+                        if ln < blockSize then
+                            Array.append b <|
+                                Array.repeat (blockSize - ln) 0
+
+                        else
+                            b
+                in
+                (b2 :: List.append bs res)
+                    |> List.reverse
+
+            head :: tail ->
+                padLastBlockLoop blockSize tail <| head :: res
+
+
 {-| Put a 0x80 at the end of the last block, and pad with zeroes.
 
 No padding is done if the last block is of the blockSize, and does NOT already end with 0 or 0x80.
@@ -206,95 +252,66 @@ No padding is done if the last block is of the blockSize, and does NOT already e
 -}
 padLastBlock : Int -> List Block -> List Block
 padLastBlock blockSize blocks =
-    let
-        loop : List Block -> List Block -> List Block
-        loop =
-            \blocks res ->
-                case blocks of
-                    [] ->
-                        []
+    padLastBlockLoop blockSize blocks []
 
-                    [ blk ] ->
-                        let
-                            block =
-                                stripTrailingZeroes blk
 
-                            len =
-                                Array.length block
+unpadLastBlockLoop : List Block -> List Block -> List Block
+unpadLastBlockLoop =
+    \blocks res ->
+        case blocks of
+            [] ->
+                []
 
-                            last =
-                                Maybe.withDefault 0 <|
-                                    Array.get (len - 1) block
+            [ blk ] ->
+                let
+                    block =
+                        stripTrailingZeroes blk
 
-                            ( b, bs, ln ) =
-                                if len == blockSize && (last == 0 || last == marker) then
-                                    ( Array.fromList [ marker ]
-                                    , [ block ]
-                                    , 1
-                                    )
-                                else if len < blockSize then
-                                    ( Array.push marker block
-                                    , []
-                                    , len + 1
-                                    )
-                                else
-                                    ( block
-                                    , []
-                                    , len
-                                    )
+                    len =
+                        Array.length block
 
-                            b2 =
-                                if ln < blockSize then
-                                    Array.append b <|
-                                        Array.repeat (blockSize - ln) 0
-                                else
-                                    b
-                        in
-                        (b2 :: List.append bs res)
-                            |> List.reverse
+                    last =
+                        Maybe.withDefault 1 <| Array.get (len - 1) block
 
-                    head :: tail ->
-                        loop tail <| head :: res
-    in
-    loop blocks []
+                    b =
+                        if last == marker then
+                            Array.slice 0 -1 block
+
+                        else
+                            block
+                in
+                (b :: res)
+                    |> List.reverse
+
+            head :: tail ->
+                unpadLastBlockLoop tail (head :: res)
 
 
 {-| Remove the padding added by `padLastBlock` from the last block in a list.
 -}
 unpadLastBlock : List Block -> List Block
 unpadLastBlock blocks =
-    let
-        loop : List Block -> List Block -> List Block
-        loop =
-            \blocks res ->
-                case blocks of
-                    [] ->
-                        []
+    unpadLastBlockLoop blocks []
 
-                    [ blk ] ->
-                        let
-                            block =
-                                stripTrailingZeroes blk
 
-                            len =
-                                Array.length block
+stripTrailingZeroesLoop : Block -> Int -> Block
+stripTrailingZeroesLoop block =
+    \idx ->
+        if idx < 0 then
+            block
 
-                            last =
-                                Maybe.withDefault 1 <| Array.get (len - 1) block
+        else
+            case Array.get idx block of
+                Nothing ->
+                    --can't happen
+                    block
 
-                            b =
-                                if last == marker then
-                                    Array.slice 0 -1 block
-                                else
-                                    block
-                        in
-                        (b :: res)
-                            |> List.reverse
+                Just x ->
+                    if x /= 0 then
+                        Array.slice 0 (1 + idx) block
 
-                    head :: tail ->
-                        loop tail (head :: res)
-    in
-    loop blocks []
+                    else
+                        stripTrailingZeroesLoop block (idx - 1)
 
 
 {-| Strip the trailing zeroes from a block.
@@ -304,25 +321,8 @@ stripTrailingZeroes block =
     let
         len =
             Array.length block
-
-        loop : Int -> Block
-        loop =
-            \idx ->
-                if idx < 0 then
-                    block
-                else
-                    case Array.get idx block of
-                        Nothing ->
-                            --can't happen
-                            block
-
-                        Just x ->
-                            if x /= 0 then
-                                Array.slice 0 (1 + idx) block
-                            else
-                                loop (idx - 1)
     in
-    loop (len - 1)
+    stripTrailingZeroesLoop block (len - 1)
 
 
 {-| Convert a list of integers into a list of blocks.
@@ -373,10 +373,10 @@ decryptList config (Key key) list =
 
         step : Block -> ( List Block, state ) -> ( List Block, state )
         step =
-            \block ( blocks, state ) ->
+            \block ( blocks, state_ ) ->
                 let
                     ( outBlock, state2 ) =
-                        chainer state pair key block
+                        chainer state_ pair key block
                 in
                 ( outBlock :: blocks, state2 )
 

@@ -10,31 +10,15 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.Strings.Types
-    exposing
-        ( Block
-        , BlockSize
-        , Chainer
-        , Chaining
-        , ChainingInitializer
-        , ChainingStateAdjoiner
-        , ChainingStateSeparator
-        , Ciphertext
-        , Config
-        , Decoder
-        , Decryptor
-        , Encoder
-        , Encoding
-        , Encryption
-        , Encryptor
-        , Key(..)
-        , KeyEncoder
-        , KeyEncoding
-        , KeyExpander
-        , Passphrase
-        , Plaintext
-        , RandomGenerator
-        )
+module Crypto.Strings.Types exposing
+    ( Passphrase, Plaintext, Ciphertext
+    , KeyExpander, Key(..), Config, BlockSize, Block
+    , Encryption, Encryptor, Decryptor, RandomGenerator
+    , KeyEncoding, KeyEncoder
+    , Encoding, Encoder, Decoder
+    , Chaining, ChainingInitializer, Chainer
+    , ChainingStateAdjoiner, ChainingStateSeparator
+    )
 
 {-| Shared types used by all the Crypto.Strings modules.
 

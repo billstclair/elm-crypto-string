@@ -10,12 +10,7 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.Strings
-    exposing
-        ( decrypt
-        , encrypt
-        , justEncrypt
-        )
+module Crypto.Strings exposing (encrypt, justEncrypt, decrypt)
 
 {-| Block chaining and string encryption for use with any block cipher.
 

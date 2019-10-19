@@ -10,13 +10,12 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.Strings.Example
-    exposing
-        ( doDecrypt
-        , doEncrypt
-        , ecbDecrypt
-        , ecbEncrypt
-        )
+module Crypto.Strings.Example exposing
+    ( doDecrypt
+    , doEncrypt
+    , ecbDecrypt
+    , ecbEncrypt
+    )
 
 import Crypto.Strings exposing (decrypt, encrypt)
 import Crypto.Strings.BlockAes as Aes

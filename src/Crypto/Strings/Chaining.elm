@@ -10,13 +10,10 @@
 ----------------------------------------------------------------------
 
 
-module Crypto.Strings.Chaining
-    exposing
-        ( CtrState
-        , EcbState
-        , ctrChaining
-        , ecbChaining
-        )
+module Crypto.Strings.Chaining exposing
+    ( EcbState, CtrState
+    , ecbChaining, ctrChaining
+    )
 
 {-| Block chaining for block ciphers.
 
@@ -140,22 +137,23 @@ ctrChainer state ( encryptor, _ ) key block =
     )
 
 
+loop : Int -> Block -> Block
+loop =
+    \idx block_ ->
+        case Array.get idx block_ of
+            Nothing ->
+                block_
+
+            Just x ->
+                if x == 255 then
+                    loop (idx + 1) <| Array.set idx 0 block_
+
+                else
+                    Array.set idx (1 + x) block_
+
+
 incrementBlock : Block -> Block
 incrementBlock block =
-    let
-        loop : Int -> Block -> Block
-        loop =
-            \idx block ->
-                case Array.get idx block of
-                    Nothing ->
-                        block
-
-                    Just x ->
-                        if x == 255 then
-                            loop (idx + 1) <| Array.set idx 0 block
-                        else
-                            Array.set idx (1 + x) block
-    in
     loop 0 block
 
 
