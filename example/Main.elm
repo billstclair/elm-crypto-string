@@ -1,8 +1,8 @@
 ----------------------------------------------------------------------
 --
 -- example.elm
--- Example of using the S3 library
--- Copyright (c) 2017 Bill St. Clair <billstclair@gmail.com>
+-- Example of using the billstclair/elm-crypto-string
+-- Copyright (c) 2017-2019 Bill St. Clair <billstclair@gmail.com>
 -- Some rights reserved.
 -- Distributed under the MIT License
 -- See LICENSE.txt
@@ -10,8 +10,9 @@
 ----------------------------------------------------------------------
 
 
-module Main exposing (..)
+module Main exposing (Model, Msg(..), b, br, btext, decrypt, encrypt, init, main, update, view)
 
+import Browser
 import Crypto.Strings as Strings
 import Debug exposing (log)
 import Html
@@ -54,12 +55,12 @@ import Html.Events exposing (on, onClick, onInput, targetValue)
 import List.Extra as LE
 import Random exposing (Seed, initialSeed)
 import Task
-import Time exposing (Time)
+import Time exposing (Posix)
 
 
 main =
-    Html.program
-        { init = init
+    Browser.element
+        { init = \() -> init
         , view = view
         , update = update
         , subscriptions = \_ -> Sub.none
@@ -75,7 +76,7 @@ type alias Model =
 
 
 type Msg
-    = InitializeSeed Time
+    = InitializeSeed Posix
     | SetPassphrase String
     | SetPlaintext String
     | SetCiphertext String
@@ -97,8 +98,8 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        InitializeSeed time ->
-            ( { model | seed = initialSeed <| round time }
+        InitializeSeed posix ->
+            ( { model | seed = initialSeed <| Time.posixToMillis posix }
             , Task.perform Encrypt <| Task.succeed ()
             )
 
@@ -189,7 +190,7 @@ btext str =
 view : Model -> Html Msg
 view model =
     div
-        [ style [ ( "margin-left", "3em" ) ]
+        [ style "margin-left" "3em"
         ]
         [ h2 [] [ text "Elm.Crypto.Strings Example" ]
         , p []
@@ -226,7 +227,7 @@ view model =
                 , rows 10
                 , value model.ciphertext
                 , onInput SetCiphertext
-                , style [ ( "font-family", "monospace" ) ]
+                , style "font-family" "monospace"
                 ]
                 []
             , br
@@ -237,7 +238,7 @@ view model =
             [ a [ href "http://elm-lang.org" ]
                 [ text "Elm" ]
             , text " "
-            , a [ href "https://github.com/billstclair/elm-crypto-string.git" ]
+            , a [ href "https://github.com/billstclair/elm-crypto-string" ]
                 [ text "GitHub" ]
             ]
         ]
