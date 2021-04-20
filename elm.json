@@ -21,7 +21,6 @@
         "elm-community/array-extra": "2.0.0 <= v < 3.0.0",
         "elm-community/list-extra": "8.1.0 <= v < 9.0.0",
         "ktonon/elm-crypto": "1.1.2 <= v < 2.0.0",
-        "ktonon/elm-word": "2.1.2 <= v < 3.0.0",
         "rtfeldman/elm-hex": "1.0.0 <= v < 2.0.0",
         "waratuman/elm-coder": "3.0.0 <= v < 4.0.0"
     },
